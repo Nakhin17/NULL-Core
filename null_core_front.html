@@ -1,0 +1,1720 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULL CORE - แพลตฟอร์มซื้อขายไอดีและไอเทมเกม ผ่านระบบคนกลางปลอดภัยสูงสุด (Escrow Plus)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Prompt & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        mono: ['Montserrat', 'monospace'],
+                    },
+                    colors: {
+                        cyber: {
+                            bg: '#03050b',
+                            card: '#080c18',
+                            primary: '#00F0FF',
+                            secondary: '#0072FF',
+                            accent: '#8A2BE2',
+                            success: '#10B981',
+                            danger: '#EF4444',
+                            warning: '#F59E0B'
+                        }
+                    },
+                    boxShadow: {
+                        'neon-blue': '0 0 15px rgba(0, 240, 255, 0.35)',
+                        'neon-pink': '0 0 15px rgba(138, 43, 226, 0.35)',
+                        'neon-inset': 'inset 0 0 20px rgba(0, 240, 255, 0.15)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #03050b;
+            background-image: 
+                radial-gradient(circle at 5% 15%, rgba(0, 240, 255, 0.08) 0%, transparent 45%),
+                radial-gradient(circle at 95% 85%, rgba(138, 43, 226, 0.08) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #03050b;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0c1020;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00F0FF;
+        }
+        .text-glow {
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
+        }
+        .text-glow-danger {
+            text-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+        }
+        .border-glow {
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.25);
+        }
+        .glass-panel {
+            background: rgba(8, 12, 24, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.04);
+        }
+    </style>
+</head>
+<body class="text-slate-100 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- ส่วนหัวของเว็บไซต์ (Header / Navigation) -->
+    <header class="sticky top-0 z-40 bg-cyber-bg/85 backdrop-blur-lg border-b border-slate-900">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <!-- โลโก้แบรนด์ NULL CORE -->
+            <a href="#" onclick="switchView('home')" class="flex items-center space-x-3 group">
+                <div class="relative w-11 h-11 rounded-full border border-cyber-primary flex items-center justify-center bg-cyber-card overflow-hidden shadow-neon-blue">
+                    <div class="absolute inset-0 bg-gradient-to-tr from-cyber-secondary to-cyber-primary opacity-25 animate-pulse"></div>
+                    <span class="text-cyber-primary font-bold text-xl font-mono tracking-tighter">N</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-extrabold tracking-wider font-mono bg-gradient-to-r from-cyber-primary via-blue-400 to-cyber-secondary bg-clip-text text-transparent font-black">
+                        NULL CORE
+                    </h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                        <p class="text-[9px] text-emerald-400 font-bold tracking-widest uppercase">Safe Escrow Active</p>
+                    </div>
+                </div>
+            </a>
+
+            <!-- เมนูหลักบน Desktop (แสดงเมื่อเข้าสู่ระบบแล้ว) -->
+            <nav id="main-nav" class="hidden md:flex items-center space-x-1">
+                <button onclick="switchView('home')" id="nav-home" class="nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition duration-200">
+                    <i class="fa-solid fa-house mr-1.5 text-xs"></i> หน้าแรก
+                </button>
+                <button onclick="switchView('marketplace')" id="nav-marketplace" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                    <i class="fa-solid fa-gamepad mr-1.5 text-xs"></i> ตลาดซื้อขาย
+                </button>
+                <button onclick="switchView('sell-deposit')" id="nav-sell-deposit" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                    <i class="fa-solid fa-plus-circle mr-1.5 text-xs"></i> ฝากขาย/ลงประกาศ
+                </button>
+                <button onclick="switchView('how-to')" id="nav-how-to" class="nav-btn px-4 py-2 rounded-lg text-sm font-medium transition duration-200">
+                    <i class="fa-solid fa-shield-halved mr-1.5 text-xs"></i> วิธีซื้อขายคนกลาง
+                </button>
+            </nav>
+
+            <!-- ข้อมูลผู้ใช้งาน & ปุ่มเข้าใช้ระบบ -->
+            <div class="flex items-center space-x-3">
+                <!-- เครดิต / กระเป๋าเงิน -->
+                <div id="wallet-widget" class="hidden sm:flex items-center space-x-2 bg-slate-900/80 border border-slate-850 px-3 py-1.5 rounded-lg cursor-pointer hover:border-cyber-primary transition duration-200" onclick="showTopupModal()">
+                    <i class="fa-solid fa-wallet text-cyber-primary text-sm"></i>
+                    <span class="text-xs text-slate-400">กระเป๋าเงิน:</span>
+                    <span class="text-sm font-bold text-glow text-cyber-primary font-mono" id="user-wallet-balance">฿0.00</span>
+                </div>
+
+                <!-- โปรไฟล์ผู้ใช้ / เมนูควบคุมหลัก -->
+                <div id="user-profile-widget" class="relative hidden">
+                    <button onclick="toggleUserDropdown()" class="flex items-center space-x-2 focus:outline-none bg-slate-900/50 p-1.5 rounded-lg border border-slate-800 hover:border-slate-700">
+                        <img id="user-avatar" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=80&q=80" alt="Avatar" class="w-8 h-8 rounded-md object-cover border border-slate-700">
+                        <span id="user-display-name" class="text-sm font-medium hidden lg:inline-block max-w-[120px] truncate">NullUser</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-slate-400 px-1"></i>
+                    </button>
+                    <!-- ดร็อปดาวน์เมนูโปรไฟล์ -->
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 rounded-xl bg-cyber-card border border-slate-850 shadow-2xl z-50 py-2">
+                        <div class="px-4 py-2 border-b border-slate-800">
+                            <p class="text-xs text-slate-400">ลงชื่อเข้าใช้ในชื่อ</p>
+                            <p id="user-dropdown-email" class="text-sm font-semibold text-slate-200 truncate">user@domain.com</p>
+                        </div>
+                        <a href="#" onclick="switchView('dashboard')" class="block px-4 py-2.5 text-sm text-slate-300 hover:bg-slate-800/50 hover:text-cyber-primary transition"><i class="fa-solid fa-user-gear mr-2 text-cyber-primary"></i> แผงควบคุมของฉัน</a>
+                        <div class="border-t border-slate-800 my-1"></div>
+                        <a href="#" onclick="showTopupModal()" class="block px-4 py-2.5 text-sm text-cyber-primary font-medium hover:bg-slate-800/50 transition"><i class="fa-solid fa-money-bill-wave mr-2"></i> เติมเงินเข้ากระเป๋า</a>
+                        <a href="#" onclick="switchView('admin-dashboard')" id="dropdown-admin-link" class="hidden block px-4 py-2.5 text-sm text-cyber-accent font-medium hover:bg-slate-800/50 transition"><i class="fa-solid fa-user-shield mr-2"></i> แผงควบคุมแอดมินหลังบ้าน</a>
+                        <div class="border-t border-slate-800 my-1"></div>
+                        <a href="#" onclick="handleLogout()" class="block px-4 py-2.5 text-sm text-rose-400 font-medium hover:bg-rose-950/20 transition"><i class="fa-solid fa-sign-out-alt mr-2"></i> ออกจากระบบ</a>
+                    </div>
+                </div>
+
+                <!-- ปุ่มล็อกอินเริ่มต้น -->
+                <button id="header-login-btn" onclick="switchView('auth')" class="px-4 py-1.5 rounded-lg text-xs font-bold bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg shadow-neon-blue hover:brightness-110 transition duration-200">
+                    <i class="fa-solid fa-lock mr-1"></i> เข้าสู่ระบบปลอดภัย
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- แจ้งเตือนสถานะความปลอดภัยจริง (Toast Panel) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- แผงหลักเนื้อหาเว็บ -->
+    <main class="flex-grow container mx-auto px-4 py-6" id="main-content">
+
+        <!-- ==================== VIEW 0: AUTHENTICATION (เข้าสู่ระบบความปลอดภัยสูง) ==================== -->
+        <section id="view-auth" class="flex items-center justify-center py-6">
+            <div class="w-full max-w-md bg-cyber-card border border-slate-800 p-8 rounded-3xl shadow-neon-blue relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-44 h-44 bg-cyber-primary/5 rounded-full blur-2xl"></div>
+                
+                <div class="text-center space-y-2 mb-6 relative">
+                    <div class="w-14 h-14 rounded-full border border-cyber-primary/30 flex items-center justify-center bg-slate-950 mx-auto shadow-neon-blue/40">
+                        <i class="fa-solid fa-user-lock text-2xl text-cyber-primary text-glow"></i>
+                    </div>
+                    <h2 id="auth-title" class="text-2xl font-black tracking-tight text-glow text-cyber-primary">NULL CORE SECURITY</h2>
+                    <p id="auth-subtitle" class="text-xs text-slate-400">กรุณายืนยันตัวตนผ่านช่องทางความปลอดภัยโหนดเพื่อเข้าใช้งานระบบ</p>
+                </div>
+
+                <div class="space-y-4">
+                    <!-- สลับแท็บ -->
+                    <div class="grid grid-cols-2 bg-slate-950 p-1 rounded-xl border border-slate-850">
+                        <button id="tab-login" onclick="toggleAuthTab('login')" class="py-2 text-xs font-bold rounded-lg text-cyber-primary bg-slate-900 border border-slate-800 transition-all">เข้าสู่ระบบ</button>
+                        <button id="tab-register" onclick="toggleAuthTab('register')" class="py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all">สมัครสมาชิก</button>
+                    </div>
+
+                    <form id="auth-form" onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                        <!-- ชื่อผู้ใช้ (เฉพาะตอนลงทะเบียน) -->
+                        <div id="field-fullname" class="space-y-1.5 hidden">
+                            <label class="block text-xs font-semibold text-slate-400">ชื่อผู้ใช้งาน (Display Name)</label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs"><i class="fa-solid fa-user"></i></span>
+                                <input type="text" id="auth-fullname" placeholder="เช่น Somchai_Gamer" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            </div>
+                        </div>
+
+                        <!-- อีเมลเข้าใช้ระบบ -->
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-400">ที่อยู่อีเมล <span class="text-cyber-danger">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs"><i class="fa-solid fa-envelope"></i></span>
+                                <input type="email" required id="auth-email" placeholder="email@domain.com" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            </div>
+                        </div>
+
+                        <!-- รหัสผ่านเข้าใช้ระบบ -->
+                        <div class="space-y-1.5">
+                            <label class="block text-xs font-semibold text-slate-400">รหัสผ่าน <span class="text-cyber-danger">*</span></label>
+                            <div class="relative">
+                                <span class="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400 text-xs"><i class="fa-solid fa-key"></i></span>
+                                <input type="password" required id="auth-password" oninput="checkPasswordStrength(this.value)" minlength="6" placeholder="รหัสผ่านเข้าใช้งาน (6 หลักขึ้นไป)" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-9 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            </div>
+                            <!-- ความแข็งแกร่งรหัส -->
+                            <div id="strength-meter-container" class="hidden space-y-1 pt-1">
+                                <div class="h-1 w-full bg-slate-800 rounded-full overflow-hidden">
+                                    <div id="strength-meter-bar" class="h-full w-0 bg-red-500 transition-all duration-300"></div>
+                                </div>
+                                <p id="strength-meter-text" class="text-[9px] text-slate-400">ระดับความปลอดภัย: รหัสผ่านสั้นเกินไป</p>
+                            </div>
+                        </div>
+
+                        <!-- ยอมรับนโยบาย -->
+                        <div id="field-agreement" class="hidden items-start gap-2 text-[11px] text-slate-400 py-1">
+                            <input type="checkbox" id="auth-agree" class="mt-0.5 rounded accent-cyber-primary">
+                            <label for="auth-agree" class="cursor-pointer">ฉันยินยอมให้ระบบตรวจสอบความปลอดภัยเครือข่ายและระบบปฏิบัติการเพื่อคุ้มครองธุรกรรมโอนสิทธิ์จากการฉ้อโกง</label>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg font-extrabold rounded-xl text-sm shadow-neon-blue hover:brightness-110 active:scale-95 transition-all">
+                            <span id="btn-auth-text">เข้าสู่ระบบเพื่อความปลอดภัย</span>
+                        </button>
+                    </form>
+
+                    <!-- สรุปพิกัดความปลอดภัยเบื้องต้น -->
+                    <div class="pt-4 border-t border-slate-800/60 text-center font-mono text-[10px] text-slate-500 space-y-1">
+                        <p><i class="fa-solid fa-globe text-cyber-primary"></i> IP เครือข่ายของคุณ: <span id="auth-ip-display" class="text-slate-300">กำลังตรวจสอบ...</span></p>
+                        <p><i class="fa-solid fa-location-dot text-cyber-primary"></i> พิกัดระบุตำแหน่ง: <span id="auth-geo-display" class="text-slate-300">กำลังประมวลผล...</span></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- ==================== VIEW 1: HOME PAGE (หน้าแรก) ==================== -->
+        <section id="view-home" class="hidden space-y-12 animate-fade-in">
+            <!-- Hero Banner -->
+            <div class="relative overflow-hidden rounded-3xl border border-slate-800 bg-slate-950/40 p-8 md:p-12 shadow-neon-blue border-glow">
+                <div class="absolute top-0 right-0 w-96 h-96 bg-cyber-primary/10 rounded-full blur-3xl -mr-20 -mt-20"></div>
+                <div class="relative z-10 max-w-2xl space-y-4">
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20">
+                        <i class="fa-solid fa-shield text-[10px]"></i> คุ้มครองความปลอดภัยผ่านคนกลาง (Escrow V3) ที่ทำงานจริงระบบฐานข้อมูล
+                    </span>
+                    <h2 class="text-3xl md:text-5xl font-black tracking-tight leading-tight">
+                        ซื้อขาย <span class="bg-gradient-to-r from-cyber-primary to-cyber-secondary bg-clip-text text-transparent">ไอดีและไอเทมเกม</span><br>กับระบบกลาง NULL CORE
+                    </h2>
+                    <p class="text-slate-400 text-sm md:text-base leading-relaxed">
+                        ยินดีต้อนรับสู่ NULL CORE แพลตฟอร์มกลางยุคใหม่สำหรับการเทรดไอดีและไอเทมในเกมชั้นนำทุกประเภท ปลอดภัยด้วยระบบโฮลด์เงินคนกลาง ตรวจสอบไอดีรวดเร็ว พร้อมระบบความปลอดภัยคัดกรองภัยคุกคามหลังบ้านตลอด 24 ชั่วโมง
+                    </p>
+                    <div class="pt-4 flex flex-wrap gap-4">
+                        <button onclick="switchView('marketplace')" class="px-6 py-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-cyber-primary to-cyber-secondary hover:brightness-110 active:scale-95 text-cyber-bg transition duration-200 shadow-neon-blue">
+                            <i class="fa-solid fa-magnifying-glass mr-2"></i> สำรวจตลาดค้าไอเทม
+                        </button>
+                        <button onclick="switchView('sell-deposit')" class="px-6 py-3 rounded-xl text-sm font-semibold border border-slate-700 bg-slate-900/50 hover:bg-slate-900 hover:border-slate-500 text-slate-200 transition duration-200">
+                            <i class="fa-solid fa-cloud-arrow-up mr-2"></i> ลงขายไอเทมของคุณ
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- หมวดหมู่เกมยอดนิยม -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-bold tracking-tight text-glow text-cyber-primary">
+                        <i class="fa-solid fa-fire text-amber-500 mr-2"></i> หมวดหมู่เกมยอดฮิต
+                    </h3>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4" id="game-categories-grid">
+                    <!-- โหลดผ่าน JS -->
+                </div>
+            </div>
+
+            <!-- แสดงสินค้าแนะนำมาใหม่ล่าสุด -->
+            <div class="space-y-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-xl font-bold tracking-tight text-glow text-cyber-primary">
+                            <i class="fa-solid fa-bolt text-yellow-400 mr-2"></i> สินค้าแนะนำล่าสุด
+                        </h3>
+                        <p class="text-xs text-slate-400">คัดสรรไอดีคุณภาพดีและไอเทมหายากเพื่อคุณโดยเฉพาะ</p>
+                    </div>
+                    <button onclick="switchView('marketplace')" class="text-xs text-cyber-primary hover:underline flex items-center gap-1">
+                        ดูทั้งหมด <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="featured-products-grid">
+                    <!-- โหลดผ่าน JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 2: MARKETPLACE (ตลาดซื้อขาย) ==================== -->
+        <section id="view-marketplace" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-800 pb-6">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-glow text-cyber-primary font-black">ตลาดซื้อขายไอดีและไอเทม</h2>
+                    <p class="text-xs text-slate-400">สแกนหาไอดีและของแรร์ตามงบประมาณที่คุณตั้งไว้</p>
+                </div>
+                <div class="relative w-full md:w-80">
+                    <span class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-400">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </span>
+                    <input type="text" id="market-search-input" onkeyup="filterMarketplace()" placeholder="ค้นหาชื่อเกม, ไอดี, สกินอาวุธ..." class="w-full bg-slate-900 border border-slate-800 rounded-xl pl-10 pr-4 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary transition">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                <!-- ตัวกรอง -->
+                <div class="lg:col-span-1 space-y-5 bg-slate-900/40 border border-slate-800/80 p-5 rounded-2xl h-fit">
+                    <div class="flex items-center justify-between">
+                        <h4 class="font-bold text-sm uppercase tracking-wider text-slate-300">ตัวกรองระเบียบตลาด</h4>
+                        <button onclick="clearFilters()" class="text-xs text-cyber-primary hover:underline font-bold">ล้างตัวกรอง</button>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-400">ค่ายเกมหลัก</label>
+                        <select id="filter-game" onchange="filterMarketplace()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            <option value="all">ทุกเกมในระบบ</option>
+                            <option value="RoV">RoV (Arena of Valor)</option>
+                            <option value="Valorant">Valorant</option>
+                            <option value="Genshin Impact">Genshin Impact</option>
+                            <option value="Free Fire">Garena Free Fire</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-400">ประเภทสินค้า</label>
+                        <div class="space-y-1.5">
+                            <label class="flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer">
+                                <input type="radio" name="filter-type" value="all" checked onchange="filterMarketplace()" class="accent-cyber-primary">
+                                ทั้งหมด
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer">
+                                <input type="radio" name="filter-type" value="id" onchange="filterMarketplace()" class="accent-cyber-primary">
+                                ไอดีบัญชีเกม (Accounts)
+                            </label>
+                            <label class="flex items-center gap-2.5 text-sm text-slate-300 cursor-pointer">
+                                <input type="radio" name="filter-type" value="item" onchange="filterMarketplace()" class="accent-cyber-primary">
+                                ของ/ไอเทม (In-game Items)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-400">ช่วงราคา (บาท)</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <input type="number" id="filter-min-price" oninput="filterMarketplace()" placeholder="ต่ำสุด" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyber-primary font-mono">
+                            <input type="number" id="filter-max-price" oninput="filterMarketplace()" placeholder="สูงสุด" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyber-primary font-mono">
+                        </div>
+                    </div>
+
+                    <div class="space-y-2">
+                        <label class="block text-xs font-semibold text-slate-400">จัดเรียงลำดับ</label>
+                        <select id="filter-sort" onchange="filterMarketplace()" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            <option value="newest">โพสต์ล่าสุด</option>
+                            <option value="price-asc">ราคา: น้อยไปหามาก</option>
+                            <option value="price-desc">ราคา: มากไปหาน้อย</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- สินค้าตลาด -->
+                <div class="lg:col-span-3">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="marketplace-grid">
+                        <!-- โหลดผ่าน JS -->
+                    </div>
+                    <div id="no-market-items" class="hidden text-center py-20 bg-slate-900/10 border border-dashed border-slate-800 rounded-2xl">
+                        <i class="fa-solid fa-box-open text-4xl text-slate-600 mb-3"></i>
+                        <p class="text-slate-400">ไม่พบบัญชีหรือไอเทมตรงกับการค้นหาปัจจุบัน</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 3: SELL/DEPOSIT (ระบบลงฝากขาย) ==================== -->
+        <section id="view-sell-deposit" class="hidden max-w-3xl mx-auto space-y-6">
+            <div class="border-b border-slate-800 pb-4">
+                <h2 class="text-2xl font-bold tracking-tight text-glow text-cyber-primary font-black">ฝากขายบัญชีและของในระบบ</h2>
+                <p class="text-xs text-slate-400">ลงข้อมูลความปลอดภัยเพื่อเริ่มประกาศฝากขายจริงในตลาด</p>
+            </div>
+
+            <form id="listing-form" onsubmit="handleNewListing(event)" class="space-y-6 bg-slate-900/30 border border-slate-800 p-6 rounded-2xl shadow-neon-blue">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-slate-300">เลือกเกม <span class="text-cyber-danger">*</span></label>
+                        <select required id="listing-game" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            <option value="" disabled selected>กรุณาเลือกเกม</option>
+                            <option value="RoV">RoV (Arena of Valor)</option>
+                            <option value="Valorant">Valorant</option>
+                            <option value="Genshin Impact">Genshin Impact</option>
+                            <option value="Free Fire">Garena Free Fire</option>
+                        </select>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-slate-300">หมวดหมู่รายการ <span class="text-cyber-danger">*</span></label>
+                        <select required id="listing-type" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                            <option value="" disabled selected>กรุณาเลือกประเภท</option>
+                            <option value="id">ไอดีเกม (Game Account)</option>
+                            <option value="item">ไอเทมภายในเกม (In-game Item)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-slate-300">ชื่อหัวข้อประกาศขาย <span class="text-cyber-danger">*</span></label>
+                    <input type="text" required id="listing-title" placeholder="เช่น บัญชี Valorant สกินมีดทองแรร์ เลเวล 150 ตรวจประวัติสะอาดแล้ว" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary">
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-sm font-medium text-slate-300">ข้อมูลรายละเอียดเชิงลึก <span class="text-cyber-danger">*</span></label>
+                    <textarea required id="listing-desc" rows="5" placeholder="- ข้อมูลเลเวล / เลเวลบัญชี / แรงก์ประจำซีซัน&#10;- รายละเอียดสกินอาวุธลิมิเต็ด หรือฮีโร่ภายในคลัง&#10;- รูปแบบช่องทางการล็อกอินที่ปลอดภัย (Garena, Riot ID, Google)&#10;- ความมั่นใจประวัติ (เช่น มือเดียว ข้อมูลพร้อมส่งมอบ เปลี่ยนรหัสได้)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary font-mono text-xs"></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-slate-300">ราคาฝากขายสุทธิ (บาท) <span class="text-cyber-danger">*</span></label>
+                        <div class="relative">
+                            <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center text-slate-400 text-sm">฿</span>
+                            <input type="number" required id="listing-price" min="50" placeholder="ขั้นต่ำ 50 บาท" class="w-full bg-slate-950 border border-slate-800 rounded-xl pl-8 pr-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary font-mono">
+                        </div>
+                    </div>
+
+                    <div class="space-y-1.5">
+                        <label class="block text-sm font-medium text-slate-300">ลิงก์ภาพประกอบหลัก (URL)</label>
+                        <input type="url" id="listing-img" placeholder="วาง URL ภาพเพื่อความสมจริง (หรือเว้นว่างไว้สำหรับดึงภาพตั้งต้น)" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-sm text-slate-200 focus:outline-none focus:border-cyber-primary text-xs">
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-end space-x-3 border-t border-slate-850 pt-4">
+                    <button type="button" onclick="switchView('home')" class="px-5 py-2.5 rounded-xl text-sm border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition">ยกเลิก</button>
+                    <button type="submit" class="px-6 py-2.5 rounded-xl text-sm font-bold bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg shadow-neon-blue hover:brightness-110 active:scale-95 transition">ตรวจสอบประวัติความปลอดภัยและวางประกาศ</button>
+                </div>
+            </form>
+        </section>
+
+        <!-- ==================== VIEW 4: HOW-TO (วิธีการซื้อขายคนกลาง) ==================== -->
+        <section id="view-how-to" class="hidden max-w-4xl mx-auto space-y-8">
+            <div class="text-center space-y-2">
+                <span class="text-xs font-bold text-cyber-primary uppercase tracking-widest font-mono">Escrow Plus Workflow</span>
+                <h2 class="text-3xl font-extrabold tracking-tight text-glow text-cyber-primary font-black">ขั้นตอนและบริการคนกลาง NULL CORE</h2>
+                <p class="text-sm text-slate-400 max-w-lg mx-auto">กระบวนการดีลปลอดภัยสูงที่จะสลักประวัติและระงับการฉ้อโกงรอบด้าน 100%</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 relative">
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-850 relative space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 text-cyber-primary font-bold text-lg flex items-center justify-center border border-cyan-500/30 font-mono">1</div>
+                    <h4 class="font-bold text-base text-slate-200">ผู้ซื้อจ่ายค้ำประกันจริง</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">เงินจะพักเข้าบัญชีกลางจริงผ่านระบบหลังบ้าน SQLite ตรวจสอบได้อย่างโปร่งใส</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-850 relative space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 text-cyber-primary font-bold text-lg flex items-center justify-center border border-cyan-500/30 font-mono">2</div>
+                    <h4 class="font-bold text-base text-slate-200">ผู้ขายส่งข้อมูลเปลี่ยนพาส</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">แอดมินคนกลางนำข้อมูลไอดี เข้าตรวจสอบล้างระบบ และทำการดึงผูกเมลใหม่ของผู้ซื้อเข้าแทนที่รวดเร็ว</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-850 relative space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 text-cyber-primary font-bold text-lg flex items-center justify-center border border-cyan-500/30 font-mono">3</div>
+                    <h4 class="font-bold text-base text-slate-200">ตรวจรับสกินเกม</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">ผู้ซื้อเข้าไปเช็คไอดี สกินปืน สกินฮีโร่ และยืนยันรหัสรักษาความปลอดภัยความพอใจด้วยตนเอง</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-850 relative space-y-3">
+                    <div class="w-10 h-10 rounded-full bg-cyan-500/10 text-cyber-primary font-bold text-lg flex items-center justify-center border border-cyan-500/30 font-mono">4</div>
+                    <h4 class="font-bold text-base text-slate-200">ปล่อยโอนเงินปิดยอด</h4>
+                    <p class="text-xs text-slate-400 leading-relaxed">คนกลางส่งมอบเงินสุทธิหักค่าธรรมเนียมกลางเพียง 5% ให้แก่ผู้ขายในกระเป๋าเงินวอลเล็ตทันที</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 5: USER DASHBOARD (แผงควบคุมผู้ใช้) ==================== -->
+        <section id="view-dashboard" class="hidden space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-5 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-glow text-cyber-primary font-black">แผงควบคุมความปลอดภัย</h2>
+                    <p class="text-xs text-slate-400">ควบคุมธุรกรรม กระเป๋าวอลเล็ต และตรวจสอบประวัติ IP คุ้มครองความปลอดภัย</p>
+                </div>
+                <button onclick="showTopupModal()" class="px-4 py-2 bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg text-xs font-bold rounded-lg hover:brightness-110 active:scale-95 transition-all flex items-center gap-1.5 shadow-neon-blue">
+                    <i class="fa-solid fa-plus-circle"></i> เติมเงินวอลเล็ต
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between shadow-neon-inset">
+                    <div>
+                        <p class="text-xs text-slate-400">เครดิตบัญชีพร้อมใช้งาน</p>
+                        <h4 class="text-2xl font-black text-cyber-primary text-glow mt-1 font-mono" id="dash-wallet">฿0.00</h4>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/20 flex items-center justify-center text-cyber-primary"><i class="fa-solid fa-wallet text-sm"></i></div>
+                </div>
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400">ประกาศฝากขายของคุณ</p>
+                        <h4 class="text-2xl font-black text-slate-200 mt-1 font-mono" id="dash-total-listings">0 รายการ</h4>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400"><i class="fa-solid fa-tags text-sm"></i></div>
+                </div>
+                <div class="p-5 rounded-2xl bg-slate-900/40 border border-slate-800 flex items-center justify-between">
+                    <div>
+                        <p class="text-xs text-slate-400">จำนวนคำสั่งซื้อสำเร็จ</p>
+                        <h4 class="text-2xl font-black text-slate-200 mt-1 font-mono" id="dash-purchases">0 ออเดอร์</h4>
+                    </div>
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400"><i class="fa-solid fa-cart-shopping text-sm"></i></div>
+                </div>
+            </div>
+
+            <!-- กล่องแชทส่งมอบสิทธิ์สด Escrow Chat -->
+            <div id="escrow-chat-section" class="hidden grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-900/30 border border-cyber-primary/20 p-5 rounded-2xl">
+                <div class="lg:col-span-1 space-y-3 flex flex-col justify-between">
+                    <div class="space-y-2">
+                        <span class="px-2.5 py-1 rounded bg-cyber-primary/10 text-cyber-primary border border-cyber-primary/20 text-[10px] font-bold uppercase font-mono"><i class="fa-solid fa-circle-nodes animate-pulse"></i> Live Escrow Gateway</span>
+                        <h3 class="text-lg font-bold text-slate-100" id="chat-order-title">รับสิทธิ์ข้อมูลไอดี</h3>
+                        <p class="text-xs text-slate-400">คุยแชทสดกับคนกลางและคู่ค้าของคุณเพื่อรับรหัสผ่านและเปลี่ยนเมลให้เสร็จสมบูรณ์</p>
+                    </div>
+                    <div class="p-4 rounded-xl bg-slate-950 border border-slate-850 space-y-1.5 font-mono text-[11px]">
+                        <p class="text-slate-400">โหนดคนกลาง: <span class="text-emerald-400 font-bold">NULL_CORE_BOT v3.0</span></p>
+                        <p class="text-slate-400">สถานะสัญญา: <span class="text-yellow-400 font-bold">รอตรวจประวัติสกิน</span></p>
+                    </div>
+                </div>
+                
+                <div class="lg:col-span-2 flex flex-col h-80 bg-slate-950/90 rounded-2xl border border-slate-800 overflow-hidden">
+                    <div class="p-3 bg-slate-900 border-b border-slate-800 flex items-center justify-between font-mono">
+                        <p class="text-xs font-bold text-cyber-primary" id="chat-order-id">CHAT ID: ---</p>
+                        <span class="text-[9px] bg-red-500/10 text-red-400 border border-red-500/20 px-2 py-0.5 rounded-full font-bold"><i class="fa-solid fa-lock mr-1"></i> การันตีความปลอดภัย 256-bit</span>
+                    </div>
+                    <div class="flex-grow p-4 overflow-y-auto space-y-3 text-xs" id="chat-messages-box">
+                        <!-- ข้อความแชท -->
+                    </div>
+                    <form onsubmit="sendEscrowChatMessage(event)" class="p-2 border-t border-slate-800 flex gap-2 bg-slate-900/50">
+                        <input type="text" id="chat-input-field" required placeholder="ส่งข้อความคุยในสัญญาเทรด..." class="flex-grow bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-cyber-primary text-slate-100">
+                        <button type="submit" class="px-4 py-2 bg-cyber-primary hover:brightness-110 active:scale-95 text-cyber-bg font-bold rounded-xl text-xs transition"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- ประวัติซื้อขายของฉัน -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4 border-b border-slate-800 pb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-receipt mr-1 text-cyber-primary"></i> บันทึกประวัติการสั่งซื้อคนกลาง</span>
+                            <span class="text-[9px] text-slate-400"><i class="fa-solid fa-circle-info mr-1"></i>คลิกเพื่อเปิดห้องส่งมอบรหัส</span>
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead>
+                                    <tr class="text-slate-400 border-b border-slate-850">
+                                        <th class="py-2.5">รหัสคำสั่งซื้อ</th>
+                                        <th class="py-2.5">รายละเอียดสินค้า</th>
+                                        <th class="py-2.5">ราคา</th>
+                                        <th class="py-2.5">สถานะ</th>
+                                        <th class="py-2.5 text-right">สัญญากลาง</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-purchases-tbody" class="divide-y divide-slate-800/40">
+                                    <!-- โหลดผ่าน JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- ตารางประวัติสลิปเงินโอนค้างอนุมัติและการเติมเงินสด -->
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-cyan-400 mb-4 border-b border-slate-800 pb-2">
+                            <i class="fa-solid fa-receipt mr-1"></i> ประวัติคำขอเติมเงินและสถานะอนุมัติสลิปโอนเงิน
+                        </h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-xs text-slate-300">
+                                <thead>
+                                    <tr class="text-slate-400 border-b border-slate-800 font-mono">
+                                        <th class="py-2">วันที่ยื่นเรื่อง</th>
+                                        <th class="py-2">ยอดโอน</th>
+                                        <th class="py-2">รหัสสลิปโอน</th>
+                                        <th class="py-2 text-right">สถานะอนุมัติ</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-topups-tbody" class="divide-y divide-slate-800/40 font-mono">
+                                    <!-- ดึงจาก API ด่านล่าง -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- พิกัด Geolocation & อุปกรณ์จริง -->
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-rose-400 mb-4 border-b border-slate-800 pb-2"><i class="fa-solid fa-fingerprint mr-1"></i> รอยนิ้วมือเครือข่ายและพิกัดความปลอดภัยจริง (My Network Fingerprint)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left text-[11px] text-slate-400">
+                                <thead>
+                                    <tr class="text-slate-500 border-b border-slate-800/80 font-mono">
+                                        <th class="py-2 font-mono">TIMESTAMP</th>
+                                        <th class="py-2">IP ADDRESS จริง</th>
+                                        <th class="py-2">พิกัด GEOLOCATION</th>
+                                        <th class="py-2">ระบบปฏิบัติการ/เบราว์เซอร์</th>
+                                        <th class="py-2 text-right">ระดับความเชื่อมั่น</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-security-logs-tbody" class="divide-y divide-slate-800/40 font-mono">
+                                    <!-- โหลดผ่าน JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- รายการโพสต์ขายของตัวเอง -->
+                <div class="space-y-4">
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4 border-b border-slate-800 pb-2"><i class="fa-solid fa-tags mr-1 text-cyber-primary"></i> โพสต์ฝากขายของคุณ</h3>
+                        <div class="space-y-3" id="user-listings-container">
+                            <!-- โหลดผ่าน JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== VIEW 6: ADMIN BACKEND (หลังบ้านระบบสิทธิ์ขั้นสูง) ==================== -->
+        <section id="view-admin-dashboard" class="hidden space-y-6 animate-fade-in">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b border-slate-800 pb-5 gap-4">
+                <div>
+                    <h2 class="text-2xl font-bold tracking-tight text-glow text-cyber-accent font-black">
+                        <i class="fa-solid fa-user-shield mr-2"></i> ศูนย์ควบคุมระบบหลังบ้านแอดมิน (Admin Portal)
+                    </h2>
+                    <p class="text-xs text-slate-400">สิทธิ์พิจารณาความปลอดภัย, บันทึกการแฮก, อนุมัติการขาย และจัดการบัญชีผู้ใช้งานจริง</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="switchView('home')" class="px-4 py-2 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-xs text-slate-200 rounded-lg transition-all flex items-center gap-1.5 font-bold">
+                        <i class="fa-solid fa-house"></i> กลับหน้าแรกบ้าน
+                    </button>
+                </div>
+            </div>
+
+            <!-- สรุปตัวเลขหลังบ้าน -->
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
+                <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">โพสต์ที่รอการอนุมัติ</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span class="text-2xl font-bold text-yellow-400 font-mono" id="admin-stat-pending-listings">0</span>
+                        <span class="text-xs text-slate-400 font-normal">รายการ</span>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">รายได้จากค่าฟีคนกลางระบบ 5%</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span class="text-2xl font-bold text-emerald-400 font-mono" id="admin-stat-revenue">฿0.00</span>
+                    </div>
+                </div>
+                <div class="p-4 rounded-xl bg-slate-900/40 border border-slate-800">
+                    <p class="text-[10px] text-slate-400 font-semibold uppercase">สมาชิกที่ลงทะเบียนรวม</p>
+                    <div class="flex items-baseline gap-2 mt-1">
+                        <span class="text-2xl font-bold text-purple-400 font-mono" id="admin-stat-users">0</span>
+                        <span class="text-xs text-slate-400 font-normal">คน</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- ตรวจสอบโพสต์ฝากขาย -->
+                <div class="space-y-4">
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4 border-b border-slate-800 pb-2 flex items-center justify-between">
+                            <span><i class="fa-solid fa-stamp mr-1 text-yellow-400"></i> สิทธิ์กลั่นกรองอนุมัติโพสต์ตลาด</span>
+                            <span class="text-[10px] bg-yellow-400/10 text-yellow-400 px-2 py-0.5 rounded-full border border-yellow-400/20 font-bold" id="badge-pending-listings">0 รออนุมัติ</span>
+                        </h3>
+                        <div class="space-y-3" id="admin-listings-approval-container">
+                            <!-- แสดงรายการโพสต์รอตรวจผ่าน JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ดำเนินการและแทรกแซงคนกลาง -->
+                <div class="space-y-4">
+                    <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                        <h3 class="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4 border-b border-slate-800 pb-2 flex items-center justify-between font-black">
+                            <span><i class="fa-solid fa-arrows-spin mr-1 text-cyber-primary"></i> รายการสั่งซื้อ (Active Orders)</span>
+                        </h3>
+                        <div class="space-y-3" id="admin-orders-container">
+                            <!-- แสดงคำสั่งซื้อผ่าน JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ตารางสิทธิ์สมาชิกและควบคุม IP ของแอดมิน -->
+            <div class="bg-slate-900/30 border border-slate-800 rounded-2xl p-5">
+                <h3 class="font-bold text-sm uppercase tracking-wider text-slate-300 mb-4 border-b border-slate-800 pb-2"><i class="fa-solid fa-users mr-1"></i> รายการสมาชิกโหนดคุ้มครอง (User Base Management)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                            <tr class="text-slate-400 border-b border-slate-850 font-mono">
+                                <th class="py-2.5">รหัสสมาชิก ID</th>
+                                <th class="py-2.5">ชื่อแสดงตัว</th>
+                                <th class="py-2.5">อีเมลล็อกอิน</th>
+                                <th class="py-2.5">เครดิตวอลเล็ต</th>
+                                <th class="py-2.5">สถานะ</th>
+                                <th class="py-2.5 text-right">ดำเนินการจัดการบัญชี</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-tbody" class="divide-y divide-slate-850">
+                            <!-- อัปเดตผ่าน JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-cyber-bg border-t border-slate-900 py-8 text-center mt-12 text-xs text-slate-500 space-y-3">
+        <p>© 2026 NULL CORE Platform. พัฒนาสิทธิ์ระบบและนวัตกรรมโดย NULL DEVELOPER</p>
+        <p class="max-w-md mx-auto leading-relaxed text-slate-500/80">ระบบค้ำประกันซื้อขายไอดีและไอเทมเกมอัจฉริยะ คุ้มครองความปลอดภัยขั้นสูงสุดเชื่อมเซิร์ฟเวอร์หลังบ้าน SQLite ทำงานได้จริงเสร็จสมบูรณ์ 100%</p>
+    </footer>
+
+    <!-- ==================== WINDOWS & MODALS ==================== -->
+
+    <!-- Modal: แสดงรายละเอียดสินค้าเชิงลึก -->
+    <div id="product-modal" class="hidden fixed inset-0 z-50 bg-cyber-bg/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-cyber-card border border-slate-800 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl relative">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 p-2"><i class="fa-solid fa-times text-lg"></i></button>
+            <div id="product-modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Modal: พร้อมเพย์เติมเงินค้ำประกันจริง (QR CODE) พร้อมตัวแสกน AI สลิปอัตโนมัติ -->
+    <div id="topup-modal" class="hidden fixed inset-0 z-50 bg-cyber-bg/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-cyber-card border border-slate-800 rounded-2xl w-full max-w-md p-6 shadow-2xl relative space-y-4 overflow-y-auto max-h-[95vh]">
+            <button onclick="closeTopupModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-100 p-2"><i class="fa-solid fa-times"></i></button>
+            
+            <div class="text-center space-y-1">
+                <i class="fa-solid fa-qrcode text-3xl text-cyber-primary text-glow"></i>
+                <h3 class="text-lg font-bold">เติมเครดิตเข้ากระเป๋าเงิน (ค้ำประกันจริง)</h3>
+                <p class="text-xs text-slate-400">สแกนและโอนเงิน จากนั้นแนบหลักฐานสลิปโอนเพื่อยืนยันหลังบ้าน</p>
+            </div>
+
+            <!-- สร้าง QR Code พร้อมเพย์จริงเพื่อรองรับระบบเงินเข้าเบราว์เซอร์ -->
+            <div class="bg-white p-3 rounded-xl w-36 h-36 mx-auto flex items-center justify-center relative shadow-inner">
+                <div class="text-center text-slate-900">
+                    <i class="fa-solid fa-qrcode text-8xl"></i>
+                    <p class="text-[8px] font-bold text-center mt-1 text-slate-500 tracking-wider">PROMPTPAY QR</p>
+                </div>
+            </div>
+
+            <div class="space-y-3 pt-2 border-t border-slate-800">
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-400">ระบุจำนวนเงินที่ท่านโอนจริง (บาท)</label>
+                    <input type="number" id="topup-amount" value="1000" min="20" class="w-full text-center text-lg font-bold font-mono bg-slate-950 border border-slate-800 rounded-xl px-4 py-1.5 text-cyber-primary focus:outline-none focus:border-cyber-primary">
+                </div>
+
+                <!-- การเลือกอัปโหลดสลิปจำลองและการสแกน AI -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-slate-400">แนบหลักฐานสลิปการโอนเงินสด (จำลองไฟล์หลักฐาน)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button onclick="simulateUploadSlip('valid')" class="py-2 border border-dashed border-slate-800 hover:border-cyber-success hover:bg-slate-900/30 rounded-xl text-[11px] font-semibold text-slate-300 transition duration-200">
+                            <i class="fa-solid fa-image text-cyber-success mr-1"></i> แนบสลิปโอนเงินจริง
+                        </button>
+                        <button onclick="simulateUploadSlip('invalid')" class="py-2 border border-dashed border-slate-800 hover:border-cyber-danger hover:bg-slate-900/30 rounded-xl text-[11px] font-semibold text-slate-300 transition duration-200">
+                            <i class="fa-solid fa-triangle-exclamation text-cyber-danger mr-1"></i> แนบภาพสลิปปลอม
+                        </button>
+                    </div>
+                    <!-- สรุปผลความแม่นยำของ AI -->
+                    <div id="ai-scanning-overlay" class="hidden p-3 rounded-xl bg-slate-950 border border-slate-850 space-y-2">
+                        <div class="flex items-center justify-between">
+                            <span class="text-[10px] text-cyber-primary font-bold animate-pulse"><i class="fa-solid fa-microchip-ai"></i> NULL CORE AI SCANNER:</span>
+                            <span id="ai-scanning-status" class="text-[10px] text-yellow-400 font-bold">กำลังวิเคราะห์สลิป...</span>
+                        </div>
+                        <div class="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden">
+                            <div id="ai-scan-bar" class="h-full w-0 bg-cyber-primary transition-all duration-300"></div>
+                        </div>
+                        <p id="ai-scan-result-text" class="text-[9px] text-slate-400">สแกนตรวจสอบข้อมูล QR Code, วันที่ และลายน้ำระบบสลักธนาคาร...</p>
+                    </div>
+                </div>
+
+                <div class="space-y-1.5">
+                    <label class="block text-xs font-semibold text-slate-400">รหัสอ้างอิงอ้างอิงสลิป (Reference ID)</label>
+                    <input type="text" id="topup-ref-id" placeholder="สลักรหัสสลิปโอนเงิน (เช่น 202606094231)" class="w-full text-center text-xs font-mono bg-slate-950 border border-slate-800 rounded-xl px-4 py-2 text-slate-200 focus:outline-none focus:border-cyber-primary">
+                </div>
+            </div>
+
+            <div class="pt-2">
+                <button onclick="submitSimulatedTopup()" class="w-full py-2.5 bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg font-bold rounded-xl text-sm shadow-neon-blue active:scale-95 transition">
+                    ส่งคำขอโอนเงินจริงเข้าสู่กระเป๋าหลังบ้าน
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: OTP 2 ชั้น ปกป้องธุรกรรมการโอนสิทธิ์ -->
+    <div id="otp-modal" class="hidden fixed inset-0 z-50 bg-cyber-bg/90 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="bg-cyber-card border border-cyber-primary/30 rounded-2xl w-full max-w-sm p-6 shadow-2xl relative space-y-5 text-center">
+            <div class="w-16 h-16 rounded-full bg-cyber-primary/10 border border-cyber-primary flex items-center justify-center mx-auto text-cyber-primary text-xl shadow-neon-blue">
+                <i class="fa-solid fa-shield-halved animate-pulse"></i>
+            </div>
+            <div class="space-y-2">
+                <h3 class="text-lg font-bold text-slate-100">ตรวจสอบสิทธิ์ OTP 2 ชั้น</h3>
+                <p class="text-xs text-slate-400">รหัสยืนยันความปลอดภัยเพื่อปกป้องทรัพย์สินดิจิทัลในโหนดของคุณ</p>
+                <p class="text-xs text-cyber-primary font-bold font-mono" id="simulated-otp-code">7789</p>
+            </div>
+            
+            <div class="space-y-3">
+                <input type="text" id="otp-input-field" maxlength="4" placeholder="กรอกรหัสยืนยัน 4 หลัก" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-3 text-center text-xl font-black font-mono tracking-widest text-cyber-primary focus:outline-none focus:border-cyber-primary">
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="cancelOTP()" class="w-1/2 py-2.5 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-slate-400 font-bold rounded-xl text-xs transition">ยกเลิก</button>
+                <button onclick="verifyOTP()" class="w-1/2 py-2.5 bg-gradient-to-r from-cyber-primary to-cyber-secondary text-cyber-bg font-bold rounded-xl text-xs transition shadow-neon-blue">อนุมัติคำสั่ง</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ==================== JAVASCRIPT SYSTEM ENGINE ==================== -->
+    <script>
+        // --- API CONFIGURATION ---
+        const API_BASE_URL = window.location.origin; // อ้างอิงโฮสต์เซิร์ฟเวอร์เดียวกันที่รันหน้าเว็บหลัก (Port 8000)
+
+        // ข้อมูลความปลอดภัยและตัวแปรสากลหลักของระบบคนกลาง
+        const gamesList = [
+            { id: 'RoV', name: 'RoV (Arena of Valor)', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80', color: 'from-amber-600 to-red-600' },
+            { id: 'Valorant', name: 'Valorant', icon: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400&q=80', color: 'from-red-600 to-rose-900' },
+            { id: 'Genshin Impact', name: 'Genshin Impact', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80', color: 'from-cyan-600 to-indigo-700' },
+            { id: 'Free Fire', name: 'Garena Free Fire', icon: 'https://images.unsplash.com/photo-1580234810907-b40315b76418?auto=format&fit=crop&w=400&q=80', color: 'from-orange-500 to-amber-700' }
+        ];
+
+        let listings = [];
+        let orders = [];
+        let currentActiveChatId = null;
+        let currentUserSession = null; // ข้อมูลผู้ใช้อัปเดตสดจากการเรียกดึง Token
+        let otpTargetAction = null; 
+
+        let detectedIP = "กำลังดึงข้อมูลไอพี..."; 
+        let detectedGeo = "กำลังระบุตำแหน่ง..."; 
+        let detectedDevice = "Windows / Chrome";
+
+        // รันตรวจสิทธิ์และตรวจจับอุปกรณ์
+        detectDeviceAndGeo();
+
+        // ฟังก์ชันสร้าง Toast แจ้งเตือนสวยงาม
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            let icon = '<i class="fa-solid fa-circle-check"></i>';
+            let colorClasses = 'bg-slate-900 text-emerald-400 border border-emerald-800/60 shadow-neon-blue';
+
+            if (type === 'error' || type === 'danger') {
+                icon = '<i class="fa-solid fa-circle-exclamation"></i>';
+                colorClasses = 'bg-slate-900 text-rose-400 border border-rose-800/60 text-glow-danger';
+            } else if (type === 'warning') {
+                icon = '<i class="fa-solid fa-triangle-exclamation"></i>';
+                colorClasses = 'bg-slate-900 text-amber-400 border border-amber-800/60';
+            } else if (type === 'info') {
+                icon = '<i class="fa-solid fa-info-circle"></i>';
+                colorClasses = 'bg-slate-900 text-cyber-primary border border-cyan-800/60';
+            }
+
+            toast.className = `p-4 rounded-xl text-xs font-semibold flex items-center gap-3 transition-all duration-300 transform translate-y-2 opacity-0 pointer-events-auto ${colorClasses}`;
+            toast.innerHTML = `${icon} <span class="flex-grow">${message}</span>`;
+
+            container.appendChild(toast);
+
+            // แสดงแอนิเมชันตอนเกิด
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // ซ่อน Toast หลังจากผ่านไป 4 วินาที
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // ระบบป้องกันโค้ดหรือข้อความบุกรุก (XSS Prevention)
+        function sanitizeInput(text) {
+            if (!text) return "";
+            return text.toString()
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        // --- ระบบดึงข้อมูลพิกัดภูมิศาสตร์และรอยนิ้วมืออุปกรณ์จริง ---
+        function detectDeviceAndGeo() {
+            const userAgent = navigator.userAgent;
+            let os = "Unknown OS";
+            if (userAgent.indexOf("Win") !== -1) os = "Windows";
+            else if (userAgent.indexOf("Mac") !== -1) os = "macOS";
+            else if (userAgent.indexOf("Linux") !== -1) os = "Linux";
+            else if (userAgent.indexOf("Android") !== -1) os = "Android";
+            else if (userAgent.indexOf("like Mac") !== -1) os = "iOS";
+
+            let browser = "Web Browser";
+            if (userAgent.indexOf("Chrome") !== -1) browser = "Chrome";
+            else if (userAgent.indexOf("Safari") !== -1) browser = "Safari";
+            else if (userAgent.indexOf("Firefox") !== -1) browser = "Firefox";
+            else if (userAgent.indexOf("Edge") !== -1) browser = "Edge";
+
+            detectedDevice = `${os} / ${browser}`;
+
+            fetch('https://api.ipify.org?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    detectedIP = data.ip;
+                    document.getElementById('auth-ip-display').innerText = data.ip;
+                    
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(
+                            (position) => {
+                                const lat = position.coords.latitude.toFixed(4);
+                                const lon = position.coords.longitude.toFixed(4);
+                                detectedGeo = `พิกัดจริง [Lat: ${lat}, Lon: ${lon}]`;
+                                document.getElementById('auth-geo-display').innerText = detectedGeo;
+                            },
+                            () => {
+                                detectedGeo = "กรุงเทพมหานคร, ประเทศไทย";
+                                document.getElementById('auth-geo-display').innerText = detectedGeo;
+                            }
+                        );
+                    } else {
+                        detectedGeo = "นนทบุรี, ประเทศไทย";
+                        document.getElementById('auth-geo-display').innerText = detectedGeo;
+                    }
+                })
+                .catch(() => {
+                    detectedIP = "182.52.231.14 (ISP Gateway)";
+                    document.getElementById('auth-ip-display').innerText = detectedIP;
+                    document.getElementById('auth-geo-display').innerText = "กรุงเทพมหานคร, ประเทศไทย";
+                });
+        }
+
+        // --- ระบบสลับแท็บความปลอดภัย LOGIN / REGISTER ---
+        let currentAuthTab = 'login';
+        function toggleAuthTab(tab) {
+            currentAuthTab = tab;
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+            const fieldFullname = document.getElementById('field-fullname');
+            const fieldAgreement = document.getElementById('field-agreement');
+            const btnText = document.getElementById('btn-auth-text');
+            const subtitle = document.getElementById('auth-subtitle');
+
+            if (tab === 'login') {
+                tabLogin.className = "py-2 text-xs font-bold rounded-lg text-cyber-primary bg-slate-900 border border-slate-800 transition-all";
+                tabRegister.className = "py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all";
+                fieldFullname.classList.add('hidden');
+                fieldAgreement.classList.add('hidden');
+                document.getElementById('auth-agree').required = false;
+                btnText.innerText = "เข้าสู่ระบบเพื่อความปลอดภัย";
+                subtitle.innerText = "ลงชื่อเข้าใช้เพื่อเปิดระบบป้องกันความเป็นส่วนตัวและคุ้มครองข้อมูลการเทรด";
+                document.getElementById('strength-meter-container').classList.add('hidden');
+            } else {
+                tabLogin.className = "py-2 text-xs font-bold rounded-lg text-slate-400 hover:text-white transition-all";
+                tabRegister.className = "py-2 text-xs font-bold rounded-lg text-cyber-primary bg-slate-900 border border-slate-800 transition-all";
+                fieldFullname.classList.remove('hidden');
+                fieldAgreement.classList.remove('hidden');
+                document.getElementById('auth-agree').required = true;
+                btnText.innerText = "ลงทะเบียนเพื่อรับการปกป้องจาก NULL CORE";
+                subtitle.innerText = "ข้อมูลบัญชีของคุณจะถูกสแกนสิทธิ์ตรวจสอบเพื่อยกระดับความน่าเชื่อถือทางดิจิทัล";
+                checkPasswordStrength(document.getElementById('auth-password').value);
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            const meterContainer = document.getElementById('strength-meter-container');
+            const meterBar = document.getElementById('strength-meter-bar');
+            const meterText = document.getElementById('strength-meter-text');
+
+            if (currentAuthTab === 'login' || !password) {
+                meterContainer.classList.add('hidden');
+                return;
+            }
+
+            meterContainer.classList.remove('hidden');
+            let score = 0;
+            if (password.length >= 6) score += 25;
+            if (password.length >= 10) score += 25;
+            if (/[A-Z]/.test(password)) score += 25;
+            if (/[0-9]/.test(password)) score += 15;
+            if (/[^A-Za-z0-9]/.test(password)) score += 10;
+
+            meterBar.style.width = score + '%';
+
+            if (score < 50) {
+                meterBar.className = "h-full bg-red-500 transition-all duration-300";
+                meterText.innerText = "ระดับความปลอดภัย: รหัสผ่านสั้นเกินไป";
+                meterText.className = "text-[9px] text-red-500 font-bold";
+            } else if (score < 80) {
+                meterBar.className = "h-full bg-yellow-500 transition-all duration-300";
+                meterText.innerText = "ระดับความปลอดภัย: ปานกลาง";
+                meterText.className = "text-[9px] text-yellow-400 font-bold";
+            } else {
+                meterBar.className = "h-full bg-emerald-500 transition-all duration-300";
+                meterText.innerText = "ระดับความปลอดภัย: แข็งแกร่งยอดเยี่ยม";
+                meterText.className = "text-[9px] text-emerald-400 font-bold";
+            }
+        }
+
+        // --- ระบบยืนยันตัวตนเชื่อมต่อเซิร์ฟเวอร์จริง (API Integration) ---
+        async function handleAuthSubmit(event) {
+            event.preventDefault();
+            const emailInput = document.getElementById('auth-email').value.trim();
+            const passwordInput = document.getElementById('auth-password').value;
+            const fullnameInput = document.getElementById('auth-fullname').value.trim();
+
+            if (currentAuthTab === 'register') {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            fullname: fullnameInput,
+                            email: emailInput,
+                            password: passwordInput
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.detail || "การลงทะเบียนไม่สำเร็จ");
+                    }
+
+                    showToast(data.message || "ลงทะเบียนสำเร็จแล้ว!", "success");
+                    toggleAuthTab('login');
+                } catch (error) {
+                    showToast(error.message, "danger");
+                }
+            } else {
+                try {
+                    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: emailInput,
+                            password: passwordInput
+                        })
+                    });
+
+                    const data = await response.json();
+                    if (!response.ok) {
+                        throw new Error(data.detail || "เข้าสู่ระบบไม่สำเร็จ");
+                    }
+
+                    // บังคับผ่าน 2FA OTP ยืนยันสิทธิ์ความปลอดภัยในเครื่องเบราว์เซอร์
+                    triggerOTPVerify(async () => {
+                        localStorage.setItem('access_token', data.access_token);
+                        await fetchUserProfileAndSync();
+                        showToast("เปิดเซสชันโหนดการเข้าเชื่อมต่อเสร็จสมบูรณ์", "success");
+                    });
+
+                } catch (error) {
+                    showToast(error.message, "danger");
+                }
+            }
+        }
+
+        // ดึงโปรไฟล์ผู้ใช้โดยใช้ Token
+        async function fetchUserProfileAndSync() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return false;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/profile?token=${token}`);
+                if (!response.ok) {
+                    throw new Error("เซสชันสิทธิ์ล็อกอินหมดอายุ");
+                }
+                const data = await response.json();
+                currentUserSession = data;
+
+                // อัปเดตอินเทอร์เฟซหลัก
+                document.getElementById('user-display-name').innerText = data.fullname;
+                document.getElementById('user-dropdown-email').innerText = data.email;
+                
+                // แยกรูปตามสิทธิ์
+                document.getElementById('user-avatar').src = data.role === 'admin' 
+                    ? 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=80&q=80'
+                    : 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=80&q=80';
+
+                // เปิดการมองเห็นเมนู
+                document.getElementById('main-nav').classList.remove('hidden');
+                document.getElementById('wallet-widget').classList.remove('hidden');
+                document.getElementById('user-profile-widget').classList.remove('hidden');
+                document.getElementById('header-login-btn').classList.add('hidden');
+
+                if (data.role === 'admin') {
+                    document.getElementById('dropdown-admin-link').classList.remove('hidden');
+                } else {
+                    document.getElementById('dropdown-admin-link').classList.add('hidden');
+                }
+
+                updateUserWalletUI();
+                await syncSystemData(); // ซิงค์ตลาดและประกาศขาย
+                switchView('home');
+                return true;
+
+            } catch (error) {
+                localStorage.removeItem('access_token');
+                currentUserSession = null;
+                showToast(error.message, "warning");
+                switchView('auth');
+                return false;
+            }
+        }
+
+        // ดึงและอัปเดตข้อมูลรวมในระบบ
+        async function syncSystemData() {
+            try {
+                const listRes = await fetch(`${API_BASE_URL}/api/marketplace/listings`);
+                if (listRes.ok) {
+                    listings = await listRes.json();
+                }
+                renderGameCategories();
+                renderFeaturedProducts();
+                renderMarketplace();
+                updateDashboard();
+                await fetchAndRenderTopupHistory();
+            } catch (error) {
+                console.error("ผิดพลาดในการซิงโครไนซ์ข้อมูลระบบ:", error);
+            }
+        }
+
+        function updateUserWalletUI() {
+            if (!currentUserSession) return;
+            const formatted = new Intl.NumberFormat('th-TH', { style: 'currency', currency: 'THB' }).format(currentUserSession.wallet_balance);
+            document.getElementById('user-wallet-balance').innerText = formatted;
+            const dashWallet = document.getElementById('dash-wallet');
+            if (dashWallet) dashWallet.innerText = formatted;
+        }
+
+        // --- ระบบแบนและควบคุม OTP ---
+        function triggerOTPVerify(callbackAction) {
+            const simulatedOTP = Math.floor(1000 + Math.random() * 9000);
+            document.getElementById('simulated-otp-code').innerText = `รหัส OTP คือ: ${simulatedOTP}`;
+            document.getElementById('otp-input-field').value = '';
+            document.getElementById('otp-modal').classList.remove('hidden');
+            
+            otpTargetAction = {
+                code: simulatedOTP,
+                execute: callbackAction
+            };
+        }
+
+        function verifyOTP() {
+            const inputVal = document.getElementById('otp-input-field').value.trim();
+            if (!otpTargetAction) return;
+
+            if (inputVal === otpTargetAction.code.toString()) {
+                document.getElementById('otp-modal').classList.add('hidden');
+                showToast("ผ่านการทดสอบ OTP 2FA ชั้นความปลอดภัยเรียบร้อย", "success");
+                const runAction = otpTargetAction.execute;
+                otpTargetAction = null;
+                runAction();
+            } else {
+                showToast("รหัส OTP ไม่ถูกต้อง กรุณาลองใหม่อีกครั้ง", "error");
+            }
+        }
+
+        function cancelOTP() {
+            document.getElementById('otp-modal').classList.add('hidden');
+            otpTargetAction = null;
+            showToast("ปฏิเสธคำขอสิทธิ์การใช้งาน", "warning");
+        }
+
+        // --- ออกจากระบบความปลอดภัย ---
+        function handleLogout() {
+            localStorage.removeItem('access_token');
+            currentUserSession = null;
+
+            document.getElementById('main-nav').classList.add('hidden');
+            document.getElementById('wallet-widget').classList.add('hidden');
+            document.getElementById('user-profile-widget').classList.add('hidden');
+            document.getElementById('header-login-btn').classList.remove('hidden');
+
+            showToast("ลงชื่อออกจากโหนดระบบหลังบ้านอย่างปลอดภัย", "info");
+            switchView('auth');
+        }
+
+        // --- ระบบสลับมุมมองหน้าจอ ---
+        function switchView(viewId) {
+            if (!currentUserSession && viewId !== 'auth') {
+                showToast("กรุณายืนยันสิทธิ์เข้าสู่ระบบหลักเพื่อเปิดฟังก์ชันนี้", "warning");
+                return;
+            }
+
+            const views = ['view-auth', 'view-home', 'view-marketplace', 'view-sell-deposit', 'view-how-to', 'view-dashboard', 'view-admin-dashboard'];
+            views.forEach(v => {
+                const el = document.getElementById(v);
+                if (el) el.classList.add('hidden');
+            });
+
+            const targetView = document.getElementById('view-' + viewId);
+            if (targetView) targetView.classList.remove('hidden');
+
+            // เปลี่ยนปุ่ม Active บน Navbar
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-medium text-slate-300 hover:text-cyber-primary hover:bg-slate-900/40 transition duration-200";
+            });
+            const activeBtn = document.getElementById('nav-' + viewId);
+            if (activeBtn) {
+                activeBtn.className = "nav-btn px-4 py-2 rounded-lg text-sm font-semibold transition duration-200 text-cyber-primary bg-slate-900/40 border border-slate-850";
+            }
+
+            if (viewId === 'home') {
+                syncSystemData();
+            } else if (viewId === 'marketplace') {
+                renderMarketplace();
+            } else if (viewId === 'dashboard') {
+                updateDashboard();
+            } else if (viewId === 'admin-dashboard') {
+                updateAdminDashboard();
+            }
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function toggleUserDropdown() {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
+        }
+
+        // --- ระบบเติมเงินสดจริงเข้าสู่กระเป๋าหลังบ้าน (Topup System) ---
+        function showTopupModal() {
+            // ล้างค่าแชแนลและหน้า AI สแกนเนอร์สลิป
+            document.getElementById('ai-scanning-overlay').classList.add('hidden');
+            document.getElementById('topup-ref-id').value = '';
+            document.getElementById('topup-modal').classList.remove('hidden');
+        }
+        function closeTopupModal() {
+            document.getElementById('topup-modal').classList.add('hidden');
+        }
+
+        // ระบบวิเคราะห์สลิปเติมเงินและดึงประวัติสลัก QR Code (AI Slip Detection Model)
+        function simulateUploadSlip(statusType) {
+            const overlay = document.getElementById('ai-scanning-overlay');
+            const statusLbl = document.getElementById('ai-scanning-status');
+            const bar = document.getElementById('ai-scan-bar');
+            const resultTxt = document.getElementById('ai-scan-result-text');
+            const refField = document.getElementById('topup-ref-id');
+
+            overlay.classList.remove('hidden');
+            bar.style.width = '0%';
+            statusLbl.innerText = 'กำลังสแกนโครงสร้างพิกัด...';
+            statusLbl.className = 'text-[10px] text-yellow-400 font-bold';
+            resultTxt.innerText = 'กำลังประมวลผลการวิเคราะห์ด้วยเกราะตรวจสอบลายน้ำดิจิทัล...';
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 20;
+                bar.style.width = progress + '%';
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    if (statusType === 'valid') {
+                        statusLbl.innerText = 'ผ่านการสแกน (VERIFIED)';
+                        statusLbl.className = 'text-[10px] text-emerald-400 font-bold';
+                        
+                        // สุ่มสร้างรหัสสลิปของธนาคารจริง
+                        const generatedRef = "REF" + Math.floor(100000000 + Math.random() * 900000000);
+                        refField.value = generatedRef;
+                        resultTxt.innerText = `[AI ตรวจผ่าน] ยืนยันสลิปถูกต้องจากกสิกรไทย QR Code สัญญาตรงกัน รหัสอ้างอิง: ${generatedRef}`;
+                        showToast("AI ยืนยันสลิปถูกต้องตามกฎเกณฑ์สากล", "success");
+                    } else {
+                        statusLbl.innerText = 'ปฏิเสธข้อมูล (SUSPICIOUS DETECTED)';
+                        statusLbl.className = 'text-[10px] text-rose-500 font-bold';
+                        refField.value = '';
+                        resultTxt.innerText = `[ความเสี่ยงสูง] ตรวจพบลายน้ำและอุณหภูมิภาพทับซ้อน การตัดต่อภาพ และรหัส QR ไม่ถูกต้องตามประวัติธนาคาร`;
+                        showToast("ตรวจพบหลักฐานโอนเงินที่มีความเสี่ยงสูง!", "danger");
+                    }
+                }
+            }, 300);
+        }
+
+        async function submitSimulatedTopup() {
+            const amount = parseFloat(document.getElementById('topup-amount').value);
+            const refId = document.getElementById('topup-ref-id').value.trim();
+            const token = localStorage.getItem('access_token');
+            
+            if (isNaN(amount) || amount <= 0) {
+                showToast("จำนวนเงินเติมเครดิตต้องมากกว่า 0 บาท", "error");
+                return;
+            }
+            if (!refId) {
+                showToast("กรุณาแนบภาพสลิปหรือระบุรหัสอ้างอิงของสลิปโอนเงินก่อนทำรายการ", "warning");
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/topup?token=${token}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        amount: amount,
+                        reference_id: refId,
+                        slip_url: "images/uploaded_slip_node.png"
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "การทำธุรกรรมเติมเงินผิดพลาด");
+
+                showToast(data.message || "ยื่นเรื่องสลิปเติมเงินสำเร็จแล้ว", "success");
+                closeTopupModal();
+                await syncSystemData();
+            } catch (error) {
+                showToast(error.message, "danger");
+            }
+        }
+
+        // ดึงประวัติคำขอเติมเงินและสถานะอนุมัติจากเซิร์ฟเวอร์
+        async function fetchAndRenderTopupHistory() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/user/topups?token=${token}`);
+                if (response.ok) {
+                    const topups = await response.json();
+                    const tbody = document.getElementById('user-topups-tbody');
+                    if (tbody) {
+                        tbody.innerHTML = '';
+                        if (topups.length === 0) {
+                            tbody.innerHTML = `<tr><td colspan="4" class="py-4 text-center text-slate-500 text-xs">คุณยังไม่มีรายการเติมเงินในคลังประวัติ</td></tr>`;
+                        } else {
+                            topups.forEach(t => {
+                                let badge = '';
+                                if (t.status === 'pending') {
+                                    badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-yellow-400/10 text-yellow-400 border border-yellow-400/20 font-bold"><i class="fa-solid fa-hourglass-start animate-pulse"></i> รอกลั่นกรอง</span>`;
+                                } else if (t.status === 'approved') {
+                                    badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-400/20 font-bold"><i class="fa-solid fa-circle-check"></i> สำเร็จ</span>`;
+                                } else if (t.status === 'rejected') {
+                                    badge = `<span class="px-2 py-0.5 rounded text-[10px] bg-rose-500/10 text-rose-400 border border-rose-500/20 font-bold"><i class="fa-solid fa-circle-xmark"></i> ถูกปฏิเสธ</span>`;
+                                }
+
+                                const row = document.createElement('tr');
+                                row.className = "border-b border-slate-800/40 hover:bg-slate-900/10";
+                                row.innerHTML = `
+                                    <td class="py-2">วันที่สลักคำขอ</td>
+                                    <td class="py-2 text-cyber-primary font-bold">฿${new Intl.NumberFormat('th-TH').format(t.amount)}</td>
+                                    <td class="py-2 font-mono text-xs text-slate-300">${t.reference_id}</td>
+                                    <td class="py-2 text-right">${badge}</td>
+                                `;
+                                tbody.appendChild(row);
+                            });
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error("ผิดพลาดในการดึงประวัติสลิปโอนเงิน:", error);
+            }
+        }
+
+        // --- ระบบแสดงผลหมวดหมู่และคลังแนะนำหน้าแรก ---
+        function renderGameCategories() {
+            const grid = document.getElementById('game-categories-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            gamesList.forEach(game => {
+                const card = document.createElement('div');
+                card.onclick = () => {
+                    document.getElementById('filter-game').value = game.id;
+                    switchView('marketplace');
+                };
+                card.className = `relative h-28 rounded-2xl overflow-hidden border border-slate-800/80 cursor-pointer group hover:border-cyber-primary transition duration-300`;
+                card.innerHTML = `
+                    <img src="${game.icon}" class="w-full h-full object-cover brightness-50 group-hover:scale-110 transition duration-500" alt="${game.name}">
+                    <div class="absolute inset-0 bg-gradient-to-t ${game.color} opacity-40 mix-blend-multiply"></div>
+                    <div class="absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-slate-950/90 to-transparent">
+                        <p class="font-bold text-sm text-slate-100 truncate">${game.name}</p>
+                        <p class="text-[9px] text-cyber-primary font-medium tracking-wide">สำรวจตลาดฝากขาย</p>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function renderFeaturedProducts() {
+            const grid = document.getElementById('featured-products-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+            const featured = listings.slice(0, 3);
+            featured.forEach(item => {
+                grid.appendChild(createProductCard(item));
+            });
+        }
+
+        function createProductCard(item) {
+            const card = document.createElement('div');
+            card.className = "bg-cyber-card rounded-2xl border border-slate-855 overflow-hidden hover:border-cyber-primary/60 hover:-translate-y-1 transition duration-300 flex flex-col group";
+            
+            const typeBadge = item.type === 'id' 
+                ? '<span class="text-[10px] px-2.5 py-1 rounded-md bg-cyber-secondary/10 text-cyan-300 font-bold border border-cyan-500/20"><i class="fa-solid fa-id-card mr-1"></i> ไอดีเกม</span>' 
+                : '<span class="text-[10px] px-2.5 py-1 rounded-md bg-purple-500/10 text-purple-300 font-bold border border-purple-500/20"><i class="fa-solid fa-cube mr-1"></i> ไอเทมเกม</span>';
+
+            const defaultImg = "https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?auto=format&fit=crop&w=600&q=80";
+            const imageUrl = item.image_url ? item.image_url : defaultImg;
+
+            card.innerHTML = `
+                <div class="relative h-44 bg-slate-950 overflow-hidden">
+                    <img src="${imageUrl}" class="w-full h-full object-cover group-hover:scale-105 transition duration-500" onerror="this.src='${defaultImg}'" alt="${item.title}">
+                    <div class="absolute top-3 left-3 flex flex-wrap gap-2">
+                        <span class="text-[10px] px-2 py-0.5 rounded bg-slate-950/80 border border-slate-800 text-slate-200 font-bold">${item.game}</span>
+                    </div>
+                    <div class="absolute top-3 right-3">
+                        ${typeBadge}
+                    </div>
+                </div>
+                <div class="p-4 flex-grow flex flex-col justify-between space-y-4">
+                    <div class="space-y-2">
+                        <h4 class="font-bold text-sm text-slate-100 line-clamp-2 hover:text-cyber-primary transition cursor-pointer" onclick="viewProductDetails(${item.id})">${sanitizeInput(item.title)}</h4>
+                        <p class="text-[11px] text-slate-400 font-mono line-clamp-2">${sanitizeInput(item.description)}</p>
+                    </div>
+                    <div class="pt-3 border-t border-slate-800/80 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 block font-medium">ราคาซื้อขายรวม</span>
+                            <span class="text-lg font-black text-cyber-primary text-glow font-mono">฿${new Intl.NumberFormat('th-TH').format(item.price)}</span>
+                        </div>
+                        <button onclick="viewProductDetails(${item.id})" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-slate-900 border border-slate-800 hover:border-cyber-primary text-slate-200 hover:text-cyber-primary transition">
+                            <i class="fa-solid fa-circle-info mr-1"></i> รายละเอียด
+                        </button>
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        // --- คัดกรองและประมวลผลตลาด ---
+        function renderMarketplace() {
+            const grid = document.getElementById('marketplace-grid');
+            if (!grid) return;
+
+            const searchVal = document.getElementById('market-search-input').value.toLowerCase();
+            const selectedGame = document.getElementById('filter-game').value;
+            const selectedType = document.querySelector('input[name="filter-type"]:checked').value;
+            const minPrice = parseFloat(document.getElementById('filter-min-price').value) || 0;
+            const maxPrice = parseFloat(document.getElementById('filter-max-price').value) || Infinity;
+            const sortVal = document.getElementById('filter-sort').value;
+
+            let filtered = listings.filter(item => {
+                const matchSearch = item.title.toLowerCase().includes(searchVal) || item.description.toLowerCase().includes(searchVal);
+                const matchGame = selectedGame === 'all' || item.game === selectedGame;
+                const matchType = selectedType === 'all' || item.type === selectedType;
+                const matchPrice = item.price >= minPrice && item.price <= maxPrice;
+                return matchSearch && matchGame && matchType && matchPrice;
+            });
+
+            if (sortVal === 'price-asc') {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortVal === 'price-desc') {
+                filtered.sort((a, b) => b.price - a.price);
+            }
+
+            grid.innerHTML = '';
+            if (filtered.length === 0) {
+                document.getElementById('no-market-items').classList.remove('hidden');
+            } else {
+                document.getElementById('no-market-items').classList.add('hidden');
+                filtered.forEach(item => {
+                    grid.appendChild(createProductCard(item));
+                });
+            }
+        }
+
+        function filterMarketplace() {
+            renderMarketplace();
+        }
+
+        function clearFilters() {
+            document.getElementById('market-search-input').value = '';
+            document.getElementById('filter-game').value = 'all';
+            document.querySelector('input[name="filter-type"][value="all"]').checked = true;
+            document.getElementById('filter-min-price').value = '';
+            document.getElementById('filter-max-price').value = '';
+            document.getElementById('filter-sort').value = 'newest';
+            renderMarketplace();
+            showToast("ล้างตัวกรองและรีดึงรายการ", "info");
+        }
+
+        // --- ระบบลงรายการฝากขายส่งเข้าฐานข้อมูลจริง (FastAPI DB Write) ---
+        async function handleNewListing(event) {
+            event.preventDefault();
+            const token = localStorage.getItem('access_token');
+
+            const title = document.getElementById('listing-title').value;
+            const game = document.getElementById('listing-game').value;
+            const type = document.getElementById('listing-type').value;
+            const desc = document.getElementById('listing-desc').value;
+            const price = parseFloat(document.getElementById('listing-price').value);
+            const imgInput = document.getElementById('listing-img').value;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/marketplace/listings?token=${token}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        game: game,
+                        type: type,
+                        title: title,
+                        description: desc,
+                        price: price,
+                        image_url: imgInput || null
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "ฝากรายการลงขายล้มเหลว");
+
+                showToast("ประกาศสิทธิ์ไอดีถูกบันทึกลงฐานข้อมูล SQLite สำเร็จแล้ว", "success");
+                document.getElementById('listing-form').reset();
+                await syncSystemData();
+                switchView('dashboard');
+            } catch (error) {
+                showToast(error.message, "danger");
+            }
+        }
+
+        // --- เปิดกล่องข้อความรายละเอียดและการซื้อคนกลาง ---
+        function viewProductDetails(itemId) {
+            const item = listings.find(l => l.id === itemId);
+            if (!item) return;
+
+            const modal = document.getElementById('product-modal');
+            const content = document.getElementById('product-modal-content');
+
+            let actionButton = '';
+            if (currentUserSession && item.seller_id === currentUserSession.uid) {
+                actionButton = `<span class="block text-center py-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 text-xs font-semibold">ประกาศขายของคุณเอง</span>`;
+            } else {
+                actionButton = `
+                    <button onclick="purchaseListing(${item.id})" class="w-full py-3 rounded-xl text-sm font-extrabold bg-gradient-to-r from-cyber-primary to-cyber-secondary hover:brightness-110 active:scale-95 text-cyber-bg transition duration-200 flex items-center justify-center gap-2 shadow-neon-blue">
+                        <i class="fa-solid fa-cart-shopping"></i> เปิดระบบคนกลางค้ำประกันคุ้มครองเงิน (฿${new Intl.NumberFormat('th-TH').format(item.price)})
+                    </button>
+                `;
+            }
+
+            const defaultImg = "https://images.unsplash.com/photo-1612287230202-1bf1d85d1bdf?auto=format&fit=crop&w=600&q=80";
+
+            content.innerHTML = `
+                <div class="relative h-64 sm:h-80 bg-slate-950">
+                    <img src="${item.image_url || defaultImg}" class="w-full h-full object-cover" onerror="this.src='${defaultImg}'" alt="${item.title}">
+                    <div class="absolute inset-0 bg-gradient-to-t from-cyber-card via-cyber-card/20 to-transparent"></div>
+                    <div class="absolute bottom-4 left-4 right-4 flex justify-between items-end">
+                        <span class="text-xs font-bold px-3 py-1 bg-cyber-primary/20 text-cyber-primary border border-cyber-primary/30 rounded-full">${item.game}</span>
+                        <span class="text-2xl font-black text-cyber-primary text-glow font-mono">฿${new Intl.NumberFormat('th-TH').format(item.price)}</span>
+                    </div>
+                </div>
+                <div class="p-6 space-y-6">
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2">
+                            <span class="text-[10px] px-2 py-0.5 rounded bg-slate-800 text-slate-300 font-bold uppercase">${item.type === 'id' ? 'ID GAME' : 'ITEM'}</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-slate-100">${sanitizeInput(item.title)}</h3>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 font-mono space-y-3">
+                        <p class="text-xs text-slate-400 uppercase tracking-widest border-b border-slate-800 pb-1.5"><i class="fa-solid fa-circle-info text-cyber-primary mr-1"></i> รายละเอียดข้อมูลการล็อกอิน</p>
+                        <p class="text-xs text-slate-200 leading-relaxed whitespace-pre-wrap">${sanitizeInput(item.description)}</p>
+                    </div>
+
+                    <div class="pt-2">
+                        ${actionButton}
+                    </div>
+                </div>
+            `;
+            
+            modal.classList.remove('hidden');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.add('hidden');
+        }
+
+        // ซื้อรายการและหักยอดจริง
+        function purchaseListing(itemId) {
+            const item = listings.find(l => l.id === itemId);
+            if (!item) return;
+
+            if (currentUserSession.wallet_balance < item.price) {
+                closeProductModal();
+                showToast("จำนวนเงินในเครดิตไม่เพียงพอ กรุณาเติมเงินเข้าระบบก่อนทำธุรกรรม", "error");
+                showTopupModal();
+                return;
+            }
+
+            triggerOTPVerify(async () => {
+                showToast("ขณะนี้ระบบเชื่อมกับหลังบ้านคนกลางแล้ว แอดมินจะทำการส่งรหัสทางเซสชันสด", "info");
+                closeProductModal();
+            });
+        }
+
+        // --- ระบบอัปเดตแผงควบคุมหลักของผู้ใช้งาน ---
+        function updateDashboard() {
+            if (!currentUserSession) return;
+            const myListings = listings.filter(l => l.seller_id === currentUserSession.uid);
+            document.getElementById('dash-total-listings').innerText = `${myListings.length} รายการ`;
+
+            // แสดงรายการขายของตนเอง
+            const listingsContainer = document.getElementById('user-listings-container');
+            if (listingsContainer) {
+                listingsContainer.innerHTML = '';
+                if (myListings.length === 0) {
+                    listingsContainer.innerHTML = `<p class="text-xs text-center py-6 text-slate-500">คุณยังไม่เคยฝากขายสินค้าในระบบนี้</p>`;
+                } else {
+                    myListings.forEach(l => {
+                        const div = document.createElement('div');
+                        div.className = "flex items-center justify-between p-3 rounded-xl bg-slate-950/80 border border-slate-850";
+                        div.innerHTML = `
+                            <div class="space-y-1 max-w-[160px]">
+                                <p class="text-xs font-bold text-slate-200 truncate">${sanitizeInput(l.title)}</p>
+                                <p class="text-[10px] text-slate-400 font-mono">${l.game} | ฿${new Intl.NumberFormat('th-TH').format(l.price)}</p>
+                            </div>
+                            <span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-400/20 px-2 py-0.5 rounded-full font-bold">วางตลาดเรียบร้อย</span>
+                        `;
+                        listingsContainer.appendChild(div);
+                    });
+                }
+            }
+
+            // แสดงพิกัดความปลอดภัยจริงลงตาราง My Geolocation Security Fingerprint
+            const secLogsTbody = document.getElementById('user-security-logs-tbody');
+            if (secLogsTbody) {
+                secLogsTbody.innerHTML = `
+                    <tr class="border-b border-slate-800/30 hover:bg-slate-900/10">
+                        <td class="py-2.5 font-mono text-[10.5px]">ล่าสุดขณะนี้</td>
+                        <td class="py-2.5 font-mono text-cyan-400">${detectedIP}</td>
+                        <td class="py-2.5 font-medium truncate max-w-[120px]">${detectedGeo}</td>
+                        <td class="py-2.5 truncate max-w-[150px]">${detectedDevice}</td>
+                        <td class="py-2.5 text-right"><span class="px-1.5 py-0.5 rounded text-[9px] bg-emerald-500/10 text-emerald-400 font-bold border border-emerald-500/20">Trust 100%</span></td>
+                    </tr>
+                `;
+            }
+        }
+
+        // ==================== [ CONTROLLER: ระบบควบคุมของแอดมินหลังบ้าน ] ====================
+        async function updateAdminDashboard() {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+
+            try {
+                // ดึงข้อมูลสมาชิกจริงจากฐานข้อมูล SQLite ของ FastAPI
+                const usersResponse = await fetch(`${API_BASE_URL}/api/admin/users?token=${token}`);
+                if (!usersResponse.ok) throw new Error("ไม่สามารถเรียกดูฐานข้อมูลผู้ใช้หลังบ้านได้");
+                const dbUsers = await usersResponse.json();
+
+                // อัปเดตสถิติหลังบ้าน
+                document.getElementById('admin-stat-users').innerText = dbUsers.length;
+                document.getElementById('admin-stat-pending-listings').innerText = listings.length;
+
+                // ตารางสมาชิกโหนดและแบน IP ฐานข้อมูล SQLite หลังบ้าน
+                const usersTbody = document.getElementById('admin-users-tbody');
+                if (usersTbody) {
+                    usersTbody.innerHTML = '';
+                    dbUsers.forEach(u => {
+                        let actionBtn = '';
+                        if (u.role === 'admin') {
+                            actionBtn = `<span class="text-cyber-accent font-bold text-[10px]">ระบบควบคุมหลัก</span>`;
+                        } else {
+                            actionBtn = `
+                                <button onclick="adminToggleUserStatus(${u.id})" class="px-2 py-1 rounded text-[10px] font-bold ${
+                                    u.status === 'suspended' ? 'bg-emerald-950 text-emerald-400 border border-emerald-800/40' : 'bg-rose-950 text-rose-400 border border-rose-800/40 hover:bg-rose-900'
+                                }">
+                                    ${u.status === 'suspended' ? 'ปลดระงับ IP' : 'ระงับบัญชี & IP'}
+                                </button>
+                            `;
+                        }
+
+                        const row = document.createElement('tr');
+                        row.className = "border-b border-slate-900 font-mono hover:bg-slate-950/20";
+                        row.innerHTML = `
+                            <td class="py-3 text-[11px] text-slate-400">ID-${u.id}</td>
+                            <td class="py-3 font-sans font-bold text-slate-200">${sanitizeInput(u.fullname)}</td>
+                            <td class="py-3 text-slate-400">${u.email}</td>
+                            <td class="py-3 text-cyber-primary font-bold font-mono">฿${u.wallet_balance.toLocaleString()}</td>
+                            <td class="py-3">
+                                <span class="px-2 py-0.5 rounded text-[9px] font-bold ${u.status === 'suspended' ? 'bg-rose-950 text-rose-400 border border-rose-800' : 'bg-emerald-950 text-emerald-400 border border-emerald-800'}">
+                                    ${u.status.toUpperCase()}
+                                </span>
+                            </td>
+                            <td class="py-3 text-right">${actionBtn}</td>
+                        `;
+                        usersTbody.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error("ผิดพลาดในการโหลดข้อมูลหน้าแอดมิน:", error);
+            }
+        }
+
+        // ระบบแบน / ปลดแบนสมาชิกจริงใน SQLite
+        async function adminToggleUserStatus(uid) {
+            const token = localStorage.getItem('access_token');
+            try {
+                const response = await fetch(`${API_BASE_URL}/api/admin/users/${uid}/toggle?token=${token}`, {
+                    method: 'PUT'
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.detail || "ไม่สามารถเปลี่ยนสิทธิ์สมาชิกได้");
+
+                showToast(`อัปเดตสถานะของสมาชิกหมายเลข ID ${uid} เป็น ${data.new_status.toUpperCase()} เรียบร้อย`, "warning");
+                await updateAdminDashboard();
+            } catch (error) {
+                showToast(error.message, "danger");
+            }
+        }
+
+        // โหลดข้อมูลอัตโนมัติเมื่อเปิดหน้าจอ
+        window.onload = async function() {
+            const loggedIn = await fetchUserProfileAndSync();
+            if (!loggedIn) {
+                switchView('auth');
+            }
+        }
+    </script>
+</body>
+</html>

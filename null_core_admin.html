@@ -1,0 +1,1341 @@
+::NULL CORE Master Control Panel::null_core_admin.html
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛡️ NULL CORE - MASTER CENTRAL BACKEND SYSTEM (Escrow v3.5)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Prompt & Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;950&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        mono: ['Montserrat', 'monospace'],
+                    },
+                    colors: {
+                        admin: {
+                            bg: '#04060d',
+                            panel: '#090d1a',
+                            panelLight: '#11172e',
+                            border: '#1b233d',
+                            accent: '#F59E0B',    /* สีส้มเหลืองสัญญาณไฟ */
+                            cyan: '#00F0FF',      /* สีไฟนีออนไซเบอร์ */
+                            success: '#10B981',   /* สีเขียวตรวจผ่าน */
+                            danger: '#EF4444',    /* สีแดงเตือนภัย */
+                            purple: '#8A2BE2'     /* สีอำนาจควบคุม */
+                        }
+                    },
+                    boxShadow: {
+                        'admin-glow': '0 0 15px rgba(245, 158, 11, 0.25)',
+                        'cyan-glow': '0 0 15px rgba(0, 240, 255, 0.25)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #04060d;
+            background-image: 
+                radial-gradient(circle at 0% 0%, rgba(245, 158, 11, 0.04) 0%, transparent 45%),
+                radial-gradient(circle at 100% 100%, rgba(0, 240, 255, 0.04) 0%, transparent 45%);
+            background-attachment: fixed;
+        }
+        /* Custom scrollbar for tables */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #04060d;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #11172e;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #F59E0B;
+        }
+        .text-glow-amber {
+            text-shadow: 0 0 8px rgba(245, 158, 11, 0.6);
+        }
+        .text-glow-cyan {
+            text-shadow: 0 0 8px rgba(0, 240, 255, 0.6);
+        }
+    </style>
+</head>
+<body class="text-slate-200 font-sans min-h-screen flex flex-col antialiased">
+
+    <!-- ส่วนหัวเครื่องควบคุมแอดมิน (Tactical Operations Header) -->
+    <header class="sticky top-0 z-40 bg-admin-panel/90 backdrop-blur-md border-b border-admin-border shadow-xl">
+        <div class="container mx-auto px-6 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl border border-admin-accent flex items-center justify-center bg-admin-bg shadow-admin-glow">
+                    <span class="text-admin-accent font-black text-xl font-mono text-glow-amber">Ω</span>
+                </div>
+                <div>
+                    <h1 class="text-lg font-black tracking-wider font-mono text-admin-accent text-glow-amber flex items-center gap-1.5">
+                        NULL CORE OPERATIONS
+                    </h1>
+                    <div class="flex items-center gap-1.5">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-ping"></span>
+                        <p class="text-[9px] text-amber-400 font-bold tracking-widest uppercase font-mono">RECON BASE CONTROL CONNECTED</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- แท็บการควบคุมหลัก (Navigation Tabs) -->
+            <nav class="hidden lg:flex items-center space-x-1 bg-admin-bg/80 p-1 rounded-xl border border-admin-border font-mono text-xs">
+                <button onclick="switchTab('dashboard')" id="tab-btn-dashboard" class="tab-btn px-4 py-2 rounded-lg font-bold text-admin-accent bg-admin-panel border border-admin-border transition-all">
+                    <i class="fa-solid fa-chart-line mr-1"></i> DASHBOARD
+                </button>
+                <button onclick="switchTab('games')" id="tab-btn-games" class="tab-btn px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-gamepad mr-1"></i> MANAGED GAMES
+                </button>
+                <button onclick="switchTab('listings')" id="tab-btn-listings" class="tab-btn px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-store mr-1"></i> LISTINGS
+                </button>
+                <button onclick="switchTab('users')" id="tab-btn-users" class="tab-btn px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-users mr-1"></i> USERS & WALLETS
+                </button>
+                <button onclick="switchTab('escrow')" id="tab-btn-escrow" class="tab-btn px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition-all">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> LIVE ESCROW
+                </button>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <button onclick="syncAndRefreshAll()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-admin-panel hover:bg-admin-panelLight border border-admin-border text-admin-cyan hover:shadow-cyan-glow transition duration-200">
+                    <i class="fa-solid fa-arrows-rotate mr-1"></i> SYNC DATA
+                </button>
+                <button onclick="hardResetSystem()" class="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-admin-danger/10 hover:bg-admin-danger text-admin-danger hover:text-white border border-admin-danger/30 transition duration-200">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> HARD RESET
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Toast notification panel -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none"></div>
+
+    <!-- แผงทำงานหลัก (Main Application Workspaces) -->
+    <main class="flex-grow container mx-auto px-6 py-6 space-y-6">
+
+        <!-- ==================== TAB 1: DASHBOARD ==================== -->
+        <section id="pane-dashboard" class="space-y-6 animate-fade-in">
+            <!-- Analytics Summary Row -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-5 rounded-2xl bg-admin-panel border border-admin-border relative overflow-hidden group">
+                    <div class="absolute right-3 top-3 opacity-10 text-4xl text-admin-cyan"><i class="fa-solid fa-wallet"></i></div>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-wider uppercase">ยอดธุรกรรมหมุนเวียนค้ำประกัน</p>
+                    <h3 class="text-2xl font-black text-admin-cyan text-glow-cyan font-mono mt-1" id="dash-stat-volume">฿0.00</h3>
+                    <p class="text-[9px] text-slate-500 mt-1 font-mono">ผ่านสัญญากลางระบบทั้งหมด</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-admin-panel border border-admin-border relative overflow-hidden group">
+                    <div class="absolute right-3 top-3 opacity-10 text-4xl text-admin-accent"><i class="fa-solid fa-hand-holding-dollar"></i></div>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-wider uppercase">รายได้ค่าฟีระบบค้างจ่าย (5%)</p>
+                    <h3 class="text-2xl font-black text-admin-accent text-glow-amber font-mono mt-1" id="dash-stat-revenue">฿0.00</h3>
+                    <p class="text-[9px] text-slate-500 mt-1 font-mono">จากดีลที่ผู้ซื้อหน้าบ้านกดยอมรับสำเร็จ</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-admin-panel border border-admin-border relative overflow-hidden group">
+                    <div class="absolute right-3 top-3 opacity-10 text-4xl text-admin-success"><i class="fa-solid fa-cubes"></i></div>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-wider uppercase">โพสต์ที่กำลังอนุมัติขายจริง</p>
+                    <h3 class="text-2xl font-black text-admin-success font-mono mt-1" id="dash-stat-active-listings">0 Deals</h3>
+                    <p class="text-[9px] text-slate-500 mt-1 font-mono">แสดงผลหน้าตลาดหลักพร้อมซื้อ</p>
+                </div>
+                <div class="p-5 rounded-2xl bg-admin-panel border border-admin-border relative overflow-hidden group">
+                    <div class="absolute right-3 top-3 opacity-10 text-4xl text-admin-purple"><i class="fa-solid fa-circle-nodes"></i></div>
+                    <p class="text-[10px] text-slate-400 font-mono tracking-wider uppercase">จำนวนโหนดผู้ใช้ในระบบทั้งหมด</p>
+                    <h3 class="text-2xl font-black text-purple-400 font-mono mt-1" id="dash-stat-users">0 Nodes</h3>
+                    <p class="text-[9px] text-slate-500 mt-1 font-mono">บัญชีที่ลงทะเบียนในเครือข่าย</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- ข้อมูลเหตุการณ์ความปลอดภัยล่าสุด -->
+                <div class="lg:col-span-2 space-y-4">
+                    <div class="bg-admin-panel border border-admin-border rounded-2xl p-5">
+                        <div class="flex items-center justify-between border-b border-admin-border pb-2 mb-4">
+                            <h3 class="font-bold text-xs uppercase tracking-wider text-admin-danger font-mono flex items-center gap-1.5">
+                                <i class="fa-solid fa-triangle-exclamation text-glow-danger animate-pulse"></i> SECURITY & AUDIT INCIDENT JOURNAL
+                            </h3>
+                            <span class="text-[9px] bg-admin-danger/10 text-admin-danger border border-admin-danger/20 px-2 py-0.5 rounded font-bold font-mono">SECURE SHIELD ACTIVE</span>
+                        </div>
+                        <div class="overflow-x-auto max-h-80 overflow-y-auto">
+                            <table class="w-full text-left text-xs text-slate-400">
+                                <thead>
+                                    <tr class="text-slate-500 border-b border-admin-border font-mono text-[10px]">
+                                        <th class="py-2">TIMESTAMP</th>
+                                        <th class="py-2">ACTOR</th>
+                                        <th class="py-2">EVENT LOG ACTION DESCRIPTION</th>
+                                        <th class="py-2">NODE TYPE</th>
+                                        <th class="py-2 text-right">RISK VALUE</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="dashboard-audit-tbody" class="divide-y divide-slate-900 font-mono text-[11px]">
+                                    <!-- Dynamic Audit Logs from code -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ดัชนีระบบ & ข้อมูลจำลองเครื่องควบคุม -->
+                <div class="space-y-4">
+                    <div class="bg-admin-panel border border-admin-border rounded-2xl p-5 space-y-4">
+                        <h3 class="text-xs font-bold uppercase text-slate-400 tracking-wider font-mono border-b border-admin-border pb-2"><i class="fa-solid fa-server mr-1"></i> CONTROL CORE ENVIRONMENT</h3>
+                        <div class="space-y-3 font-mono text-xs">
+                            <div class="flex justify-between items-center py-1 border-b border-slate-900">
+                                <span class="text-slate-500">OPERATING STATION</span>
+                                <span class="text-slate-300 font-bold" id="env-host">Linux x86_64</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-900">
+                                <span class="text-slate-500">CURRENT GEO-IP GATEWAY</span>
+                                <span class="text-admin-cyan font-bold" id="env-ip">กำลังตรวจสอบ...</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1 border-b border-slate-900">
+                                <span class="text-slate-500">DATABASE BACKUP STATE</span>
+                                <span class="text-admin-success font-bold"><i class="fa-solid fa-cloud-arrow-up mr-1"></i> LOCAL_PERSISTED</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1">
+                                <span class="text-slate-500">SYSTEM STYLING PATHS</span>
+                                <span class="text-admin-accent font-bold">Tailwind / Escrow v3.5</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 2: MANAGED GAMES ==================== -->
+        <section id="pane-games" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between border-b border-admin-border pb-3">
+                <div>
+                    <h2 class="text-lg font-black text-admin-accent font-mono">GAME PLATFORMS CONTROLLER</h2>
+                    <p class="text-xs text-slate-400">แอดมินสามารถเพิ่ม ลบ หรือแก้ไขรายชื่อเกมเพื่อนำข้อมูลทั้งหมดไปบังคับแสดงผลที่หน้าบ้านได้โดยตรง</p>
+                </div>
+                <button onclick="openGameModal()" class="px-4 py-2 bg-gradient-to-r from-admin-accent to-amber-600 text-slate-950 font-black rounded-xl text-xs shadow-admin-glow hover:brightness-110 transition duration-200">
+                    <i class="fa-solid fa-plus-circle mr-1"></i> เพิ่มเกมใหม่เข้าคลัง (ADD GAME)
+                </button>
+            </div>
+
+            <!-- ตารางแสดงรายชื่อเกม -->
+            <div class="bg-admin-panel border border-admin-border rounded-2xl p-5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                            <tr class="text-slate-500 border-b border-admin-border font-mono text-[10px] uppercase">
+                                <th class="py-2.5">รหัสคีย์ (GAME KEY)</th>
+                                <th class="py-2.5">ชื่อแพลตฟอร์ม/เกม</th>
+                                <th class="py-2.5">รูปแบบไอคอน</th>
+                                <th class="py-2.5">คลาสสีแสดงสไตล์หน้าบ้าน</th>
+                                <th class="py-2.5">จำนวนรายการที่เปิดขาย</th>
+                                <th class="py-2.5 text-right">การจัดการคำสั่ง</th>
+                            </tr>
+                        </thead>
+                        <tbody id="games-tbody" class="divide-y divide-slate-900 font-mono text-[11.5px]">
+                            <!-- Load dynamic items from JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 3: LISTINGS ==================== -->
+        <section id="pane-listings" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between border-b border-admin-border pb-3">
+                <div>
+                    <h2 class="text-lg font-black text-admin-accent font-mono">MARKET LISTINGS MATRIX MANAGER</h2>
+                    <p class="text-xs text-slate-400">ควบคุม ตรวจสอบ อนุมัติ และสร้างประกาศขายแทนผู้ใช้ได้โดยตรง</p>
+                </div>
+                <button onclick="openListingModal()" class="px-4 py-2 bg-gradient-to-r from-admin-cyan to-blue-600 text-slate-950 font-black rounded-xl text-xs shadow-cyan-glow hover:brightness-110 transition duration-200">
+                    <i class="fa-solid fa-circle-plus mr-1"></i> เพิ่มสินค้าพรีเมียมโดยแอดมิน (ADD PRODUCT)
+                </button>
+            </div>
+
+            <!-- แถบกรองสเตตัสในหน้าจัดการสินค้า -->
+            <div class="flex gap-2">
+                <button onclick="filterListingTable('all')" class="listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panelLight text-admin-accent border border-admin-accent font-mono">ทั้งหมด (ALL)</button>
+                <button onclick="filterListingTable('pending')" class="listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panel text-slate-400 border border-admin-border font-mono">รอกลั่นกรอง (PENDING)</button>
+                <button onclick="filterListingTable('approved')" class="listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panel text-slate-400 border border-admin-border font-mono">อนุมัติขายแล้ว (APPROVED)</button>
+                <button onclick="filterListingTable('sold')" class="listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panel text-slate-400 border border-admin-border font-mono">ขายออกแล้ว/ดีล (SOLD)</button>
+            </div>
+
+            <div class="bg-admin-panel border border-admin-border rounded-2xl p-5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                            <tr class="text-slate-500 border-b border-admin-border font-mono text-[10px] uppercase">
+                                <th class="py-2.5">รหัสสินค้า ID</th>
+                                <th class="py-2.5">ชื่อเกม</th>
+                                <th class="py-2.5">หัวข้อฝากขายสินค้า</th>
+                                <th class="py-2.5">ราคาฝากกลาง</th>
+                                <th class="py-2.5">ผู้สิทธิ์ส่งขาย</th>
+                                <th class="py-2.5">สถานะคุมความปลอดภัย</th>
+                                <th class="py-2.5 text-right">ดำเนินการแก้ไข/สลักสิทธิ์</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listings-tbody" class="divide-y divide-slate-900 font-mono text-[11px]">
+                            <!-- Load lists -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 4: USERS & WALLETS ==================== -->
+        <section id="pane-users" class="hidden space-y-6 animate-fade-in">
+            <div class="flex items-center justify-between border-b border-admin-border pb-3">
+                <div>
+                    <h2 class="text-lg font-black text-admin-accent font-mono">MEMBER ROSTER & CREDIT TERMINAL</h2>
+                    <p class="text-xs text-slate-400">ควบคุมสิทธิ์ แก้ไขข้อมูลผู้ใช้ และสามารถปรับเครดิตกระเป๋าวอลเล็ตของยูสเซอร์ทุกคนได้จริง</p>
+                </div>
+                <button onclick="openUserModal()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold rounded-xl text-xs shadow-lg hover:brightness-110 transition duration-200">
+                    <i class="fa-solid fa-user-plus mr-1"></i> สร้างยูสเซอร์ใหม่ (CREATE USER)
+                </button>
+            </div>
+
+            <div class="bg-admin-panel border border-admin-border rounded-2xl p-5">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead>
+                            <tr class="text-slate-500 border-b border-admin-border font-mono text-[10px] uppercase">
+                                <th class="py-2.5">รหัสประจำโหนด (UID)</th>
+                                <th class="py-2.5">ชื่อแสดงตัว (FULLNAME)</th>
+                                <th class="py-2.5">อีเมลที่ลงทะเบียน</th>
+                                <th class="py-2.5">สิทธิ์บทบาท</th>
+                                <th class="py-2.5">เครดิตวอลเล็ตของโหนด</th>
+                                <th class="py-2.5">สถานะเข้าเกราะ</th>
+                                <th class="py-2.5 text-right">มาตรการควบคุมและจัดการเงิน</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody" class="divide-y divide-slate-900 font-mono text-[11.5px]">
+                            <!-- Load lists of users -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ==================== TAB 5: LIVE ESCROW ==================== -->
+        <section id="pane-escrow" class="hidden space-y-6 animate-fade-in">
+            <div class="border-b border-admin-border pb-3">
+                <h2 class="text-lg font-black text-admin-accent font-mono">LIVE ESCROW GATEWAY INTERVENTION</h2>
+                <p class="text-xs text-slate-400">แทรกแซงดีลคนกลาง อ่านสลักประวัติข้อความสัญญา และส่งมอบไอดีให้กับผู้ซื้อได้ทันที</p>
+            </div>
+
+            <!-- กริดควบคุม: ฝั่งซ้ายสัญญาซื้อขาย ฝั่งขวาห้องแชทโต้ตอบสัญญาเพื่อแทรกแซง -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- ตารางสัญญาซื้อขาย -->
+                <div class="lg:col-span-2 bg-admin-panel border border-admin-border rounded-2xl p-5 space-y-4">
+                    <h3 class="text-xs font-bold text-admin-cyan uppercase font-mono tracking-widest"><i class="fa-solid fa-list-check"></i> ตู้เซฟสัญญาคนกลางทั้งหมด</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left text-xs">
+                            <thead>
+                                <tr class="text-slate-500 border-b border-slate-900 pb-2 text-[10px] font-mono uppercase">
+                                    <th class="py-2">สัญญา ID</th>
+                                    <th class="py-2">หัวข้อดีล</th>
+                                    <th class="py-2">ผู้ซื้อ -> ผู้ขาย</th>
+                                    <th class="py-2">ยอดพักกลาง</th>
+                                    <th class="py-2 text-right">ดำเนินการกลั่นกรองสิทธิ์</th>
+                                </tr>
+                            </thead>
+                            <tbody id="escrow-contracts-tbody" class="divide-y divide-slate-900 font-mono text-[11.5px]">
+                                <!-- Load active and completed contracts -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- ห้องแชทควบคุมแบบแทรกแซง (Dispute Interceptor Chat) -->
+                <div class="lg:col-span-1 flex flex-col h-[480px] bg-admin-panel border border-admin-border rounded-2xl overflow-hidden">
+                    <div class="p-4 bg-admin-panelLight border-b border-admin-border flex justify-between items-center">
+                        <div>
+                            <h4 class="text-xs font-black text-admin-accent font-mono"><i class="fa-solid fa-headset mr-1"></i> INTERCEPTOR CHAT</h4>
+                            <p id="chat-active-target" class="text-[9px] text-slate-400 font-mono">เลือกสัญญาด้านซ้ายเพื่อเข้าไปควบคุม</p>
+                        </div>
+                        <span class="text-[9px] bg-admin-danger/10 text-admin-danger border border-admin-danger/20 px-2.5 py-1 rounded font-black font-mono">MASTER BYPASS ENABLED</span>
+                    </div>
+
+                    <!-- พื้นที่แชทจำลอง -->
+                    <div id="chat-scroller-box" class="flex-grow overflow-y-auto p-4 space-y-3 text-[11px] bg-admin-bg/40">
+                        <div class="text-center text-slate-600 py-10 font-mono">
+                            <i class="fa-solid fa-circle-nodes text-3xl mb-2 text-slate-800 animate-pulse"></i>
+                            <p>กรุณากดปุ่ม "เปิดแทรกแซงแชท" บนรายชื่อสัญญาซื้อขายเพื่อร่วมดีลและตัดสินข้อพิพาท</p>
+                        </div>
+                    </div>
+
+                    <!-- ตัวส่งข้อมูลแชทจำลอง -->
+                    <form onsubmit="sendAdminChatMessage(event)" class="p-2 border-t border-admin-border bg-admin-panelLight flex gap-2">
+                        <input type="text" id="chat-admin-input" required disabled placeholder="พิมพ์ข้อความแทรกแซงสัญญาในนามแอดมินคนกลาง..." class="flex-grow bg-admin-bg border border-admin-border rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent">
+                        <button type="submit" id="chat-admin-send-btn" disabled class="px-4 bg-gradient-to-r from-admin-accent to-amber-600 text-slate-950 font-black rounded-xl text-xs shadow-admin-glow transition"><i class="fa-solid fa-paper-plane"></i></button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ==================== WINDOWS & MODALS MANAGEMENT ==================== -->
+
+    <!-- Modal: จัดการเพิ่ม / แก้ไข เกมในระบบ (Game Editor Modal) -->
+    <div id="game-modal" class="hidden fixed inset-0 z-50 bg-admin-bg/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-admin-panel border border-admin-border rounded-3xl w-full max-w-md p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeGameModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h3 id="game-modal-title" class="text-sm font-black text-admin-accent font-mono uppercase tracking-wider border-b border-admin-border pb-2">เพิ่มข้อมูลเกมเข้าคลังสาระสนเทศ</h3>
+            <form id="game-form" onsubmit="saveGamePayload(event)" class="space-y-3.5">
+                <input type="hidden" id="form-game-id">
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">รหัสคีย์ประจำเกม (ห้ามซ้ำ เช่น RoV, Valorant, Minecraft)</label>
+                    <input type="text" id="form-game-key" required placeholder="เช่น RoV" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent font-mono">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">ชื่อแสดงผลของเกม</label>
+                    <input type="text" id="form-game-name" required placeholder="เช่น RoV (Arena of Valor)" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">คลาสสีดีไซน์ Tailwind ไล่ระดับการ์ดหน้าบ้าน</label>
+                    <input type="text" id="form-game-color" required placeholder="เช่น from-amber-600 to-red-600" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent font-mono">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">ลิงก์รูปภาพปกพื้นหลังของสล็อตเกม (Unsplash URL)</label>
+                    <input type="url" id="form-game-icon" required placeholder="https://images.unsplash.com/photo-..." class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-[10px] text-slate-300 focus:outline-none focus:border-admin-accent font-mono">
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeGameModal()" class="w-1/2 py-2.5 bg-admin-panelLight border border-admin-border text-slate-400 text-xs font-bold rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-gradient-to-r from-admin-accent to-amber-600 text-slate-950 text-xs font-black rounded-xl">ยืนยันและอัปเดตระบบ</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: จัดการเพิ่ม / แก้ไข ประกาศสินค้า (Listing Editor Modal) -->
+    <div id="listing-modal" class="hidden fixed inset-0 z-50 bg-admin-bg/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-admin-panel border border-admin-border rounded-3xl w-full max-w-lg p-6 shadow-2xl relative space-y-4 max-h-[90vh] overflow-y-auto">
+            <button onclick="closeListingModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h3 id="listing-modal-title" class="text-sm font-black text-admin-accent font-mono uppercase tracking-wider border-b border-admin-border pb-2">จัดการแก้ไขใบประกาศสินค้า</h3>
+            <form id="listing-form" onsubmit="saveListingPayload(event)" class="space-y-3">
+                <input type="hidden" id="form-listing-id">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">เลือกแพลตฟอร์มเกม</label>
+                        <select id="form-listing-game" required class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">หมวดหมู่รายการ</label>
+                        <select id="form-listing-type" required class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200 font-mono">
+                            <option value="id">Game Account (ไอดีเกม)</option>
+                            <option value="item">In-game Item (ของในเกม)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">หัวข้อขายสินค้า</label>
+                    <input type="text" id="form-listing-title" required placeholder="เช่น ไอดีสกินโบราณ แรร์มากเวลตัน" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">คำอธิบาย/สลักรายละเอียด</label>
+                    <textarea id="form-listing-desc" rows="3" required placeholder="เขียนรายละเอียด..." class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200 font-mono"></textarea>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">ราคาขายสุทธิ (บาท)</label>
+                        <input type="number" id="form-listing-price" required placeholder="฿ 3500" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs font-mono text-slate-200">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">ลิงก์ภาพประกอบหลัก (URL)</label>
+                        <input type="url" id="form-listing-img" placeholder="https://..." class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-[10px] font-mono text-slate-300">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">รหัสผู้เสนอขาย (UID)</label>
+                        <input type="text" id="form-listing-seller-id" value="SYSTEM" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs font-mono text-slate-300">
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">ชื่อแสดงตัวผู้ขาย</label>
+                        <input type="text" id="form-listing-seller-name" value="SYSTEM_ADMIN" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-300">
+                    </div>
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">บังคับเปลี่ยนสถานะสินค้า</label>
+                    <select id="form-listing-status" required class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200 font-mono">
+                        <option value="pending">PENDING (รอพิจารณาความปลอดภัย)</option>
+                        <option value="approved">APPROVED (อนุมัติวางตลาดหน้าบ้านแล้ว)</option>
+                        <option value="sold">SOLD (ขายแล้ว/อยู่ภายใต้สัญญา)</option>
+                    </select>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeListingModal()" class="w-1/2 py-2.5 bg-admin-panelLight border border-admin-border text-slate-400 text-xs font-bold rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-gradient-to-r from-admin-cyan to-blue-600 text-slate-950 text-xs font-black rounded-xl">ยืนยันเขียนทับลงฐานข้อมูล</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal: จัดการเพิ่ม / แก้ไข ผู้ใช้งาน & วอลเล็ต (User & Wallet Editor Modal) -->
+    <div id="user-modal" class="hidden fixed inset-0 z-50 bg-admin-bg/85 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-admin-panel border border-admin-border rounded-3xl w-full max-w-md p-6 shadow-2xl relative space-y-4">
+            <button onclick="closeUserModal()" class="absolute top-4 right-4 text-slate-400 hover:text-white"><i class="fa-solid fa-times"></i></button>
+            <h3 id="user-modal-title" class="text-sm font-black text-admin-accent font-mono uppercase tracking-wider border-b border-admin-border pb-2">จัดการโปรไฟล์และวอลเล็ตโหนดผู้ใช้</h3>
+            <form id="user-form" onsubmit="saveUserPayload(event)" class="space-y-3.5">
+                <input type="hidden" id="form-user-uid">
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">ชื่อแสดงตัวตนในระบบ (Full Name)</label>
+                    <input type="text" id="form-user-fullname" required placeholder="เช่น นายสมบูรณ์ เทรดเดอร์" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">อีเมลลงทะเบียนระบบ</label>
+                    <input type="email" id="form-user-email" required placeholder="name@domain.com" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent font-mono">
+                </div>
+                <div class="space-y-1">
+                    <label class="block text-[11px] text-slate-400">รหัสผ่านบัญชี (พิมพ์หากต้องการเปลี่ยนพาสใหม่ ระบบจะแฮช SHA-256 เอง)</label>
+                    <input type="text" id="form-user-password" placeholder="กรอกพาสใหม่ หรือปล่อยว่างไว้เพื่อใช้รหัสเดิม" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2.5 text-xs text-slate-200 focus:outline-none focus:border-admin-accent">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">สิทธิ์บทบาท (Role)</label>
+                        <select id="form-user-role" required class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200">
+                            <option value="user">USER (ผู้ใช้งานธรรมดา)</option>
+                            <option value="admin">ADMIN (สิทธิ์แอดมินเจ้าของระบบ)</option>
+                        </select>
+                    </div>
+                    <div class="space-y-1">
+                        <label class="block text-[11px] text-slate-400">สถานะระงับแบน</label>
+                        <select id="form-user-status" required class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-xs text-slate-200">
+                            <option value="active">Active (ปกติ)</option>
+                            <option value="suspended">Suspended (ระงับสิทธิ์แบนโหนด)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="p-4 bg-admin-panelLight border border-admin-border rounded-2xl space-y-2">
+                    <p class="text-[11px] text-slate-400 font-bold uppercase font-mono tracking-wider"><i class="fa-solid fa-piggy-bank text-admin-cyan"></i> ปรับแต่งเงินในกระเป๋าวอลเล็ต (Wallet Credit Engine)</p>
+                    <div class="flex gap-2 items-center">
+                        <span class="text-xs text-slate-500 font-mono">ยอดเงินปัจจุบัน:</span>
+                        <input type="number" id="form-user-wallet" required placeholder="฿0.00" class="w-full bg-admin-bg border border-admin-border rounded-xl p-2 text-sm font-mono font-bold text-admin-cyan focus:outline-none">
+                    </div>
+                </div>
+                <div class="pt-2 flex gap-2">
+                    <button type="button" onclick="closeUserModal()" class="w-1/2 py-2.5 bg-admin-panelLight border border-admin-border text-slate-400 text-xs font-bold rounded-xl">ยกเลิก</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-gradient-to-r from-purple-600 to-indigo-600 text-white text-xs font-bold rounded-xl">เขียนทับสิทธิ์ผู้ใช้</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ==================== JAVASCRIPT SYSTEM ENGINE (MASTER BACKEND) ==================== -->
+    <script>
+        // --- คีย์จับสิทธิ์ฐานข้อมูลจำลองตรงกับหน้าบ้าน ---
+        const STORAGE_USERS = 'nullcore_v3_users_db';
+        const STORAGE_LISTINGS = 'nullcore_v3_listings_db';
+        const STORAGE_ORDERS = 'nullcore_v3_orders_db';
+        const STORAGE_SECURITY_LOGS = 'nullcore_v3_security_logs';
+        const STORAGE_GAMES = 'nullcore_v3_games_db';
+        const STORAGE_CHATS = 'nullcore_v3_chats_db';
+
+        let activeTab = 'dashboard';
+        let currentListingFilter = 'all';
+        let activeChatContractId = null;
+
+        // ดักเริ่มฐานข้อมูลจำลองสลักตรงกับหน้าบ้าน
+        const defaultGames = [
+            { id: 'RoV', name: 'RoV (Arena of Valor)', icon: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80', color: 'from-amber-600 to-red-600' },
+            { id: 'Valorant', name: 'Valorant', icon: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?auto=format&fit=crop&w=400&q=80', color: 'from-red-600 to-rose-900' },
+            { id: 'Genshin Impact', name: 'Genshin Impact', icon: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?auto=format&fit=crop&w=400&q=80', color: 'from-cyan-600 to-indigo-700' },
+            { id: 'Free Fire', name: 'Garena Free Fire', icon: 'https://images.unsplash.com/photo-1580234810907-b40315b76418?auto=format&fit=crop&w=400&q=80', color: 'from-orange-500 to-amber-700' }
+        ];
+
+        // ฟังก์ชันแฮชรหัสผ่านจำลอง
+        async function sha256(message) {
+            const msgBuffer = new TextEncoder().encode(message);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+
+        // --- ดึงค่า / เซฟค่า ฐานข้อมูลจริงจาก LocalStorage ---
+        function getDBUsers() { return JSON.parse(localStorage.getItem(STORAGE_USERS)) || []; }
+        function saveDBUsers(data) { localStorage.setItem(STORAGE_USERS, JSON.stringify(data)); }
+        
+        function getDBListings() { return JSON.parse(localStorage.getItem(STORAGE_LISTINGS)) || []; }
+        function saveDBListings(data) { localStorage.setItem(STORAGE_LISTINGS, JSON.stringify(data)); }
+        
+        function getDBOrders() { return JSON.parse(localStorage.getItem(STORAGE_ORDERS)) || []; }
+        function saveDBOrders(data) { localStorage.setItem(STORAGE_ORDERS, JSON.stringify(data)); }
+
+        function getDBLogs() { return JSON.parse(localStorage.getItem(STORAGE_SECURITY_LOGS)) || []; }
+        function saveDBLogs(data) { localStorage.setItem(STORAGE_SECURITY_LOGS, JSON.stringify(data)); }
+
+        function getDBGames() {
+            if (!localStorage.getItem(STORAGE_GAMES)) {
+                localStorage.setItem(STORAGE_GAMES, JSON.stringify(defaultGames));
+            }
+            return JSON.parse(localStorage.getItem(STORAGE_GAMES));
+        }
+        function saveDBGames(data) { localStorage.setItem(STORAGE_GAMES, JSON.stringify(data)); }
+
+        function getDBChats() {
+            const defaultChats = {
+                "ORD-7703": [
+                    { sender: "System", text: "ห้องคุยคนกลางอัจฉริยะเริ่มต้นขึ้นแล้ว! กรุณารอแอดมินตรวจสอบข้อมูลพาสเวิร์ดไอดี", time: "09:31" },
+                    { sender: "Admin Agent", text: "สวัสดีครับคุณผู้ซื้อและผู้ขาย ผมคือแอดมินคนกลางคุม ORD-7703 สัญญาปลอดภัย 100% ครับ", time: "09:35" }
+                ]
+            };
+            if (!localStorage.getItem(STORAGE_CHATS)) {
+                localStorage.setItem(STORAGE_CHATS, JSON.stringify(defaultChats));
+            }
+            return JSON.parse(localStorage.getItem(STORAGE_CHATS));
+        }
+        function saveDBChats(data) { localStorage.setItem(STORAGE_CHATS, JSON.stringify(data)); }
+
+
+        // --- ระบบสลับหน้าจอหลังบ้าน (Tabs Switcher) ---
+        function switchTab(tabId) {
+            activeTab = tabId;
+            const panels = ['pane-dashboard', 'pane-games', 'pane-listings', 'pane-users', 'pane-escrow'];
+            panels.forEach(p => document.getElementById(p).classList.add('hidden'));
+
+            const targetPane = document.getElementById('pane-' + tabId);
+            if(targetPane) targetPane.classList.remove('hidden');
+
+            // เปลี่ยนสถานะปุ่มสีบนแท็บ
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.className = "tab-btn px-4 py-2 rounded-lg font-bold text-slate-400 hover:text-white transition-all";
+            });
+            const activeBtn = document.getElementById('tab-btn-' + tabId);
+            if(activeBtn) {
+                activeBtn.className = "tab-btn px-4 py-2 rounded-lg font-bold text-admin-accent bg-admin-panel border border-admin-border shadow-admin-glow transition-all";
+            }
+
+            renderAllScreens();
+        }
+
+        // --- ระบบแจ้งเตือนหลังบ้าน (Toast) ---
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-xl shadow-lg border text-xs font-bold flex items-center space-x-2.5 transition duration-300 transform translate-y-0 bg-admin-panelLight ${
+                type === 'success' ? 'border-admin-success/30 text-admin-success' : 
+                type === 'warning' ? 'border-admin-accent/30 text-admin-accent' : 
+                'border-admin-danger/30 text-admin-danger'
+            }`;
+            
+            toast.innerHTML = `
+                <i class="${type === 'success' ? 'fa-solid fa-circle-check' : type === 'warning' ? 'fa-solid fa-triangle-exclamation' : 'fa-solid fa-circle-exclamation'}"></i> 
+                <span>${message}</span>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => { toast.remove(); }, 3500);
+        }
+
+        // --- LOG AUDIT SYSTEM ---
+        function logSecurityIncident(actor, action, riskLevel) {
+            const logs = getDBLogs();
+            const now = new Date().toLocaleString('th-TH');
+            logs.unshift({
+                timestamp: now,
+                email: actor,
+                event: action,
+                ip: "127.0.0.1",
+                geo: "MASTER BACKEND CONTROL",
+                device: "Administrative Shell (Linux / Chrome)",
+                severity: riskLevel
+            });
+            saveDBLogs(logs);
+        }
+
+        // --- 1. RENDER SCREEN: DASHBOARD & STATS ---
+        function renderDashboard() {
+            const users = getDBUsers();
+            const listings = getDBListings();
+            const orders = getDBOrders();
+            const logs = getDBLogs();
+
+            // คำนวณยอดเงินธุรกรรมค้ำประกันรวมทั้งหมด
+            const totalVolume = orders.reduce((sum, o) => sum + o.price, 0);
+            document.getElementById('dash-stat-volume').innerText = `฿${new Intl.NumberFormat('th-TH').format(totalVolume)}`;
+
+            // คำนวณค่าฟีกลางรวม 5% (เฉพาะออเดอร์ที่ 'completed' แล้ว)
+            const completedOrders = orders.filter(o => o.status === 'completed');
+            const totalRevenue = completedOrders.reduce((sum, o) => sum + (o.price * 0.05), 0);
+            document.getElementById('dash-stat-revenue').innerText = `฿${new Intl.NumberFormat('th-TH').format(totalRevenue)}`;
+
+            // แสดงรายการขายที่แอคทีฟอยู่
+            const activeListingsCount = listings.filter(l => l.status === 'approved').length;
+            document.getElementById('dash-stat-active-listings').innerText = `${activeListingsCount} รายการ`;
+
+            // แสดงยอดรวมยูสเซอร์
+            document.getElementById('dash-stat-users').innerText = `${users.length} Nodes`;
+
+            // แสดงตารางประวัติความปลอดภัยบนแดชบอร์ด
+            const auditTbody = document.getElementById('dashboard-audit-tbody');
+            auditTbody.innerHTML = '';
+            
+            const displayLogs = logs.slice(0, 15); // แสดง 15 รายการล่าสุด
+            if (displayLogs.length === 0) {
+                auditTbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-600 font-mono">ไม่มีข้อมูลระบบบันทึกความปลอดภัยเข้าสู่ Journal</td></tr>`;
+            } else {
+                displayLogs.forEach(log => {
+                    let riskColor = "text-emerald-400";
+                    let riskBg = "bg-emerald-500/10 border-emerald-500/20";
+                    if (log.severity === 'medium' || log.severity === 'high') {
+                        riskColor = "text-admin-accent";
+                        riskBg = "bg-amber-500/10 border-amber-500/20";
+                    } else if (log.severity === 'critical') {
+                        riskColor = "text-admin-danger font-black";
+                        riskBg = "bg-red-500/10 border-red-500/20 animate-pulse";
+                    }
+
+                    auditTbody.innerHTML += `
+                        <tr class="hover:bg-admin-panelLight/40 border-b border-slate-900/60 transition">
+                            <td class="py-2.5 text-slate-500 font-mono text-[10px]">${log.timestamp}</td>
+                            <td class="py-2.5 text-slate-300 font-bold">${log.email}</td>
+                            <td class="py-2.5 text-slate-400 font-medium">${log.event}</td>
+                            <td class="py-2.5 text-slate-500 truncate max-w-[150px]" title="${log.device}">${log.device}</td>
+                            <td class="py-2.5 text-right">
+                                <span class="px-2 py-0.5 rounded border text-[9px] font-bold ${riskBg} ${riskColor}">
+                                    ${log.severity.toUpperCase()}
+                                </span>
+                            </td>
+                        </tr>`;
+                });
+            }
+        }
+
+        // --- 2. RENDER SCREEN: MANAGED GAMES ---
+        function renderGames() {
+            const games = getDBGames();
+            const listings = getDBListings();
+            const tbody = document.getElementById('games-tbody');
+            tbody.innerHTML = '';
+
+            games.forEach(game => {
+                const count = listings.filter(l => l.game === game.id).length;
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-900/60 hover:bg-admin-panelLight/20 transition">
+                        <td class="py-3 font-bold text-admin-cyan">${game.id}</td>
+                        <td class="py-3 font-bold text-slate-200">${game.name}</td>
+                        <td class="py-3">
+                            <img src="${game.icon}" class="w-10 h-7 object-cover rounded border border-slate-800" onerror="this.src='https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=80&q=80'">
+                        </td>
+                        <td class="py-3 text-slate-400 font-mono text-[10.5px]">${game.color}</td>
+                        <td class="py-3 font-bold text-admin-accent">${count} รายการ</td>
+                        <td class="py-3 text-right space-x-2">
+                            <button onclick="editGame('${game.id}')" class="px-2.5 py-1 rounded bg-admin-accent/10 hover:bg-admin-accent border border-admin-accent/20 text-admin-accent hover:text-slate-950 font-bold text-[10px] transition">แก้ไขข้อมูล</button>
+                            <button onclick="deleteGame('${game.id}')" class="px-2.5 py-1 rounded bg-admin-danger/10 hover:bg-admin-danger border border-admin-danger/20 text-admin-danger hover:text-white font-bold text-[10px] transition">ลบเกม</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // --- 3. RENDER SCREEN: LISTINGS ---
+        function filterListingTable(status) {
+            currentListingFilter = status;
+            document.querySelectorAll('.listing-filter-btn').forEach(btn => {
+                btn.className = "listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panel text-slate-400 border border-admin-border font-mono";
+            });
+            // ไฮไลต์ปุ่มปัจจุบัน
+            event.target.className = "listing-filter-btn px-4 py-1.5 rounded-lg text-xs font-bold bg-admin-panelLight text-admin-accent border border-admin-accent font-mono";
+            renderListings();
+        }
+
+        function renderListings() {
+            const listings = getDBListings();
+            const tbody = document.getElementById('listings-tbody');
+            tbody.innerHTML = '';
+
+            let filtered = listings;
+            if (currentListingFilter !== 'all') {
+                filtered = listings.filter(l => l.status === currentListingFilter);
+            }
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" class="py-10 text-center text-slate-500">ไม่มีรายการประกาศสินค้าในสถานะคัดกรองนี้</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                let statusBadge = '';
+                if (item.status === 'pending') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-accent/10 border border-admin-accent/20 text-admin-accent">รอตรวจสอบ</span>`;
+                else if (item.status === 'approved') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-success/10 border border-admin-success/20 text-admin-success">ขายอยู่</span>`;
+                else if (item.status === 'sold') statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-cyan/10 border border-admin-cyan/20 text-admin-cyan">ขายแล้ว</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-900/60 hover:bg-admin-panelLight/20 transition">
+                        <td class="py-3 font-bold text-slate-400 font-mono">${item.id}</td>
+                        <td class="py-3 text-slate-300 font-bold">${item.game}</td>
+                        <td class="py-3 text-slate-200 font-semibold truncate max-w-xs" title="${item.title}">${item.title}</td>
+                        <td class="py-3 text-admin-cyan font-bold font-mono">฿${new Intl.NumberFormat('th-TH').format(item.price)}</td>
+                        <td class="py-3 text-slate-400 text-xs">${item.seller} <br><span class="text-[9px] text-slate-600 font-mono">${item.sellerId}</span></td>
+                        <td class="py-3">${statusBadge}</td>
+                        <td class="py-3 text-right space-x-2">
+                            <button onclick="editListing('${item.id}')" class="px-2 py-1 rounded bg-admin-cyan/10 hover:bg-admin-cyan border border-admin-cyan/20 text-admin-cyan hover:text-slate-950 font-bold text-[10px] transition"><i class="fa-solid fa-pen"></i> แก้ไข</button>
+                            <button onclick="deleteListing('${item.id}')" class="px-2 py-1 rounded bg-admin-danger/10 hover:bg-admin-danger border border-admin-danger/20 text-admin-danger hover:text-white font-bold text-[10px] transition"><i class="fa-solid fa-trash-can"></i> ลบ</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // --- 4. RENDER SCREEN: USERS & WALLETS ---
+        function renderUsers() {
+            const users = getDBUsers();
+            const tbody = document.getElementById('users-tbody');
+            tbody.innerHTML = '';
+
+            users.forEach(u => {
+                let statusBadge = u.status === 'suspended' 
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-danger/10 border border-admin-danger/20 text-admin-danger"><i class="fa-solid fa-ban"></i> SUSPENDED</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-success/10 border border-admin-success/20 text-admin-success">🟢 ACTIVE</span>`;
+
+                let roleBadge = u.role === 'admin'
+                    ? `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-purple/15 border border-admin-purple/30 text-purple-400">ADMIN</span>`
+                    : `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-850 border border-slate-700 text-slate-400">USER</span>`;
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-900/60 hover:bg-admin-panelLight/20 transition">
+                        <td class="py-3 font-bold font-mono text-slate-400">${u.uid}</td>
+                        <td class="py-3 text-slate-200 font-bold">${u.fullname}</td>
+                        <td class="py-3 font-mono text-slate-400 text-xs">${u.email}</td>
+                        <td class="py-3">${roleBadge}</td>
+                        <td class="py-3 text-admin-cyan font-bold font-mono text-glow-cyan">฿${new Intl.NumberFormat('th-TH').format(u.wallet)}</td>
+                        <td class="py-3">${statusBadge}</td>
+                        <td class="py-3 text-right space-x-1.5">
+                            <button onclick="editUser('${u.uid}')" class="px-3 py-1 bg-admin-accent/10 hover:bg-admin-accent border border-admin-accent/20 text-admin-accent hover:text-slate-950 text-[10.5px] font-bold rounded-lg transition"><i class="fa-solid fa-user-gear mr-1"></i> ปรับแต่งสิทธิ์ & กระเป๋าเงิน</button>
+                        </td>
+                    </tr>`;
+            });
+        }
+
+        // --- 5. RENDER SCREEN: LIVE ESCROW & CHAT ---
+        function renderEscrowContracts() {
+            const orders = getDBOrders();
+            const tbody = document.getElementById('escrow-contracts-tbody');
+            tbody.innerHTML = '';
+
+            if (orders.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-10 text-center text-slate-500 font-mono">ยังไม่มีข้อพิพาทหรือสัญญาคนกลางถูกเปิดในระบบหน้าบ้าน</td></tr>`;
+                return;
+            }
+
+            orders.forEach(o => {
+                let badge = '';
+                let ctrlButtons = '';
+
+                if (o.status === 'processing') {
+                    badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-accent/15 border border-admin-accent/30 text-admin-accent"><i class="fa-solid fa-spinner animate-spin mr-1"></i> ตรวจรหัส</span>`;
+                    ctrlButtons = `
+                        <button onclick="deliverEscrowContract('${o.id}')" class="px-2 py-1 bg-admin-accent hover:bg-amber-500 text-slate-950 font-black text-[10px] rounded mr-1 transition">สลับส่งสิทธิ์</button>
+                    `;
+                } else if (o.status === 'delivering') {
+                    badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-cyan/15 border border-admin-cyan/30 text-admin-cyan"><i class="fa-solid fa-truck-fast mr-1"></i> ส่งแล้วรอรับ</span>`;
+                    ctrlButtons = `
+                        <button onclick="forceCompleteContract('${o.id}')" class="px-2 py-1 bg-admin-success hover:bg-emerald-500 text-slate-950 font-black text-[10px] rounded mr-1 transition">บังคับปล่อยเงิน</button>
+                    `;
+                } else if (o.status === 'completed') {
+                    badge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-admin-success/15 border border-admin-success/30 text-admin-success">🟢 สำเร็จสมบูรณ์</span>`;
+                }
+
+                // ปุ่มพิจารณายกเลิกสัญญา (Refund) คืนเงินฝั่งซื้อได้เสมอถ้าไม่สำเร็จ
+                if (o.status !== 'completed') {
+                    ctrlButtons += `
+                        <button onclick="forceRefundContract('${o.id}')" class="px-2 py-1 bg-admin-danger/20 hover:bg-admin-danger border border-admin-danger/30 text-admin-danger hover:text-white font-bold text-[10px] rounded transition">ยกเลิก/คืนเงิน</button>
+                    `;
+                }
+
+                tbody.innerHTML += `
+                    <tr class="border-b border-slate-900/60 hover:bg-admin-panelLight/20 transition cursor-pointer" onclick="openChatIntervention('${o.id}')">
+                        <td class="py-3 font-black text-admin-accent underline">${o.id}</td>
+                        <td class="py-3 text-slate-200 font-semibold truncate max-w-[120px]" title="${o.listingTitle}">${o.listingTitle}</td>
+                        <td class="py-3 text-slate-400 text-xs">${o.buyer} <br><i class="fa-solid fa-arrow-right text-[8px] mx-1"></i> ${o.seller}</td>
+                        <td class="py-3 font-bold text-admin-cyan">฿${new Intl.NumberFormat('th-TH').format(o.price)}</td>
+                        <td class="py-3">${badge}</td>
+                        <td class="py-3 text-right whitespace-nowrap" onclick="event.stopPropagation()">${ctrlButtons}</td>
+                    </tr>`;
+            });
+        }
+
+        // --- ระบบเปิดดูแชทแทรกแซงหลังบ้านทำงานได้จริง ---
+        function openChatIntervention(contractId) {
+            activeChatContractId = contractId;
+            document.getElementById('chat-active-target').innerText = `แทรกแซงสัญญา: ${contractId}`;
+            
+            // เปิดฟังก์ชันส่งข้อความ
+            document.getElementById('chat-admin-input').disabled = false;
+            document.getElementById('chat-admin-send-btn').disabled = false;
+
+            renderLiveChatLogs();
+        }
+
+        function renderLiveChatLogs() {
+            const scroller = document.getElementById('chat-scroller-box');
+            if(!activeChatContractId || !scroller) return;
+
+            scroller.innerHTML = '';
+            const allChats = getDBChats();
+            const msgs = allChats[activeChatContractId] || [
+                { sender: "System", text: "เริ่มต้นห้องแชทจำลองสำหรับสัญญาคนกลาง", time: "ตอนนี้" }
+            ];
+
+            msgs.forEach(m => {
+                const isSystem = m.sender === 'System';
+                const isAdmin = m.sender.includes('Admin') || m.sender.includes('Middleman');
+
+                const wrapper = document.createElement('div');
+                wrapper.className = "p-2.5 rounded-xl text-xs border bg-admin-panelLight/50 max-w-[90%] ";
+
+                if (isSystem) {
+                    wrapper.className = "bg-admin-bg/90 border-slate-800 text-slate-500 text-center mx-auto my-2 max-w-full font-mono text-[10.5px]";
+                    wrapper.innerHTML = `⚠️ [INCIDENT LOG SYSTEM] ${m.text}`;
+                } else if (isAdmin) {
+                    wrapper.className += "border-admin-accent/30 text-admin-accent ml-auto mr-0 text-right font-mono";
+                    wrapper.innerHTML = `<strong>🛡️ ${m.sender} (คุณ):</strong> ${m.text} <span class="text-[8px] text-slate-500 block text-left mt-1">${m.time}</span>`;
+                } else {
+                    wrapper.className += "border-slate-800 text-slate-200 mr-auto ml-0";
+                    wrapper.innerHTML = `<strong>👤 ${m.sender}:</strong> ${m.text} <span class="text-[8px] text-slate-600 block text-right mt-1">${m.time}</span>`;
+                }
+
+                scroller.appendChild(wrapper);
+            });
+
+            scroller.scrollTop = scroller.scrollHeight;
+        }
+
+        function sendAdminChatMessage(event) {
+            event.preventDefault();
+            const input = document.getElementById('chat-admin-input');
+            const val = input.value.trim();
+            if(!val || !activeChatContractId) return;
+
+            const allChats = getDBChats();
+            if(!allChats[activeChatContractId]) allChats[activeChatContractId] = [];
+
+            const curTime = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' });
+
+            allChats[activeChatContractId].push({
+                sender: "Admin Middleman",
+                text: val,
+                time: curTime
+            });
+
+            saveDBChats(allChats);
+            input.value = '';
+            renderLiveChatLogs();
+            showToast("ส่งข้อความแทรกแซงและบันทึกประวัติสำเร็จ", "success");
+        }
+
+        // --- คำสั่งแทรกแซงสัญญาแอดมิน: สลับส่งสิทธิ์ (Deliver) ---
+        function deliverEscrowContract(orderId) {
+            let orders = getDBOrders();
+            let o = orders.find(x => x.id === orderId);
+            if(!o) return;
+
+            o.status = "delivering";
+            saveDBOrders(orders);
+
+            // บันทึกรายงานแชทว่าคนกลางส่งมอบสิทธิ์แล้ว
+            const allChats = getDBChats();
+            if(!allChats[orderId]) allChats[orderId] = [];
+            allChats[orderId].push({
+                sender: "System",
+                text: "เจ้าหน้าที่แอดมินคนกลาง ดึงสิทธิ์จัดเก็บข้อมูลพาสเวิร์ดเรียบร้อย และเปลี่ยนอีเมลแรกมอบหมายให้ผู้ซื้อตรวจสอบแล้ว",
+                time: "ตอนนี้"
+            });
+            saveDBChats(allChats);
+
+            logSecurityIncident("SYSTEM_ADMIN", `Admin delivered credentials for escrow o-id: ${orderId}`, "medium");
+            showToast(`เปลี่ยนสถานะดีล ${orderId} เป็นจัดส่งแล้วเรียบร้อย`, "success");
+            
+            renderAllScreens();
+            if (activeChatContractId === orderId) renderLiveChatLogs();
+        }
+
+        // --- คำสั่งแทรกแซงสัญญาแอดมิน: บังคับสำเร็จเพื่อปล่อยเงิน (Force Complete) ---
+        function forceCompleteContract(orderId) {
+            let orders = getDBOrders();
+            let o = orders.find(x => x.id === orderId);
+            if(!o) return;
+
+            o.status = "completed";
+            saveDBOrders(orders);
+
+            // โอนเงินเข้ากระเป๋าผู้ขายในฐานข้อมูลจำลองหลังหักค่าธรรมเนียม 5%
+            let users = getDBUsers();
+            let sellerUser = users.find(u => u.uid === o.sellerId);
+            if(sellerUser) {
+                const finalEarning = o.price * 0.95; // แอดมินเก็บฟี 5%
+                sellerUser.wallet += finalEarning;
+                saveDBUsers(users);
+                showToast(`บังคับสำเร็จดีล! เครดิตเข้าร้านผู้ขายแล้ว ฿${finalEarning.toLocaleString()}`, "success");
+            }
+
+            const allChats = getDBChats();
+            if(!allChats[orderId]) allChats[orderId] = [];
+            allChats[orderId].push({
+                sender: "System",
+                text: "เจ้าหน้าที่แอดมินใช้อำนาจ Bypass บังคับสำเร็จสัญญานี้และโอนเงินเข้ากระเป๋าผู้ขายเรียบร้อย ปิดสัญญากลาง",
+                time: "ตอนนี้"
+            });
+            saveDBChats(allChats);
+
+            logSecurityIncident("SYSTEM_ADMIN", `Bypassed & Force-Completed order escrow: ${orderId}`, "high");
+            renderAllScreens();
+            if (activeChatContractId === orderId) renderLiveChatLogs();
+        }
+
+        // --- คำสั่งแทรกแซงสัญญาแอดมิน: ยกเลิกสัญญาและคืนเงินผู้ซื้อ (Force Refund/Cancel) ---
+        function forceRefundContract(orderId) {
+            if(!confirm(`ยืนยันการคืนเงินดีลสัญญากลางหมายเลข ${orderId} ใช่หรือไม่? เครดิตเงินจะคืนกลับเข้ากระเป๋าผู้ซื้อเต็มจำนวน`)) return;
+
+            let orders = getDBOrders();
+            let o = orders.find(x => x.id === orderId);
+            if(!o) return;
+
+            // คืนเงินให้ผู้ซื้อเต็มจำนวน
+            let users = getDBUsers();
+            let buyerUser = users.find(u => u.uid === o.buyerId);
+            if(buyerUser) {
+                buyerUser.wallet += o.price;
+                saveDBUsers(users);
+                showToast(`คืนยอดเครดิตจำนวน ฿${o.price.toLocaleString()} กลับสู่บัญชี ${buyerUser.fullname} แล้ว`, "success");
+            }
+
+            // คืนสถานะสินค้ากลับมาขายในตลาดได้ใหม่
+            let listings = getDBListings();
+            let targetListing = listings.find(l => l.id === o.listingId);
+            if (targetListing) {
+                targetListing.status = "approved";
+                saveDBListings(listings);
+            }
+
+            // ลบหรือตั้งสถานะออเดอร์เป็นยกเลิก (ในที่นี้แอดมินลบออกเพื่อคลีนระบบ)
+            const remainingOrders = orders.filter(x => x.id !== orderId);
+            saveDBOrders(remainingOrders);
+
+            logSecurityIncident("SYSTEM_ADMIN", `Force refunded contract: ${orderId} returning credits back to user: ${o.buyerId}`, "high");
+            
+            activeChatContractId = null;
+            document.getElementById('chat-active-target').innerText = 'เลือกสัญญาด้านซ้ายเพื่อเข้าไปควบคุม';
+            document.getElementById('chat-admin-input').disabled = true;
+            document.getElementById('chat-admin-send-btn').disabled = true;
+
+            renderAllScreens();
+        }
+
+        // --- ยืนยันกระตุ้นการเรนเดอร์ข้อมูลทุกจอพร้อมหน้าบ้าน ---
+        function renderAllScreens() {
+            renderDashboard();
+            renderGames();
+            renderListings();
+            renderUsers();
+            renderEscrowContracts();
+        }
+
+        function syncAndRefreshAll() {
+            showToast("ประสานงานซิงค์ข้อมูลล่าสุดกับหน้าบ้านเรียบร้อย", "success");
+            renderAllScreens();
+        }
+
+
+        // ==================== [ CONTROLLER: SYSTEMS EDIT & ADD MODALS ] ====================
+
+        // --- 1. GAME MODAL FLOWS ---
+        function openGameModal() {
+            document.getElementById('game-modal-title').innerText = "เพิ่มข้อมูลเกมเข้าคลังวิเคราะห์";
+            document.getElementById('form-game-id').value = "";
+            document.getElementById('form-game-key').disabled = false;
+            document.getElementById('game-form').reset();
+            document.getElementById('game-modal').classList.remove('hidden');
+        }
+        function closeGameModal() { document.getElementById('game-modal').classList.add('hidden'); }
+        
+        function editGame(id) {
+            const games = getDBGames();
+            const game = games.find(g => g.id === id);
+            if(!game) return;
+
+            document.getElementById('game-modal-title').innerText = "แก้ไขข้อมูลแพลตฟอร์มเกม";
+            document.getElementById('form-game-id').value = game.id;
+            document.getElementById('form-game-key').value = game.id;
+            document.getElementById('form-game-key').disabled = true; // ล็อกคีย์ห้ามเปลี่ยน
+            document.getElementById('form-game-name').value = game.name;
+            document.getElementById('form-game-color').value = game.color;
+            document.getElementById('form-game-icon').value = game.icon;
+
+            document.getElementById('game-modal').classList.remove('hidden');
+        }
+
+        function saveGamePayload(event) {
+            event.preventDefault();
+            const formId = document.getElementById('form-game-id').value;
+            const key = document.getElementById('form-game-key').value.trim();
+            const name = document.getElementById('form-game-name').value.trim();
+            const color = document.getElementById('form-game-color').value.trim();
+            const icon = document.getElementById('form-game-icon').value.trim();
+
+            let games = getDBGames();
+
+            if (formId) {
+                // โหมดแก้ไข
+                games = games.map(g => g.id === formId ? { id: formId, name, color, icon } : g);
+                logSecurityIncident("SYSTEM_ADMIN", `Updated Game metadata: ${formId}`, "low");
+                showToast(`แก้ไขข้อมูลเกม ${name} เข้าสู่ฐานข้อมูลจริงสำเร็จ`, "success");
+            } else {
+                // โหมดสร้างใหม่
+                if (games.find(g => g.id.toLowerCase() === key.toLowerCase())) {
+                    showToast("รหัสคีย์เกมนี้ถูกเปิดใช้งานแล้วในสาระบบหลังบ้าน", "error");
+                    return;
+                }
+                games.push({ id: key, name, color, icon });
+                logSecurityIncident("SYSTEM_ADMIN", `Added brand new Game Node: ${key}`, "low");
+                showToast(`เพิ่มแพลตฟอร์มเกม ${name} เข้าตลาดหน้าบ้านสำเร็จ`, "success");
+            }
+
+            saveDBGames(games);
+            closeGameModal();
+            renderAllScreens();
+        }
+
+        function deleteGame(id) {
+            if(!confirm(`ยืนยันการลบเกม ${id} ออกจากระบบ? รายการสินค้าผูกกับเกมนี้ในหน้าบ้านอาจโหลดรูปไม่ได้`)) return;
+            const games = getDBGames();
+            const remaining = games.filter(g => g.id !== id);
+            saveDBGames(remaining);
+            logSecurityIncident("SYSTEM_ADMIN", `Removed Game registry: ${id}`, "medium");
+            showToast("ลบเกมออกจากคลังเรียบร้อยแล้ว", "warning");
+            renderAllScreens();
+        }
+
+
+        // --- 2. LISTING MODAL FLOWS ---
+        function populateGameSelectOptions() {
+            const games = getDBGames();
+            const select = document.getElementById('form-listing-game');
+            if(!select) return;
+            select.innerHTML = '';
+            games.forEach(g => {
+                select.innerHTML += `<option value="${g.id}">${g.name}</option>`;
+            });
+        }
+
+        function openListingModal() {
+            populateGameSelectOptions();
+            document.getElementById('listing-modal-title').innerText = "สร้างประกาศสินค้าใหม่โดยแอดมิน";
+            document.getElementById('form-listing-id').value = "";
+            document.getElementById('listing-form').reset();
+            document.getElementById('form-listing-status').value = "approved"; // ค่าตั้งต้นแอดมินเปิดให้แสดงผลทันที
+            document.getElementById('listing-modal').classList.remove('hidden');
+        }
+        function closeListingModal() { document.getElementById('listing-modal').classList.add('hidden'); }
+
+        function editListing(id) {
+            populateGameSelectOptions();
+            const listings = getDBListings();
+            const item = listings.find(l => l.id === id);
+            if(!item) return;
+
+            document.getElementById('listing-modal-title').innerText = "แก้ไขใบประกอบประกาศสินค้า";
+            document.getElementById('form-listing-id').value = item.id;
+            document.getElementById('form-listing-game').value = item.game;
+            document.getElementById('form-listing-type').value = item.type;
+            document.getElementById('form-listing-title').value = item.title;
+            document.getElementById('form-listing-desc').value = item.desc;
+            document.getElementById('form-listing-price').value = item.price;
+            document.getElementById('form-listing-img').value = item.img || "";
+            document.getElementById('form-listing-seller-id').value = item.sellerId || "SYSTEM";
+            document.getElementById('form-listing-seller-name').value = item.seller || "SYSTEM_ADMIN";
+            document.getElementById('form-listing-status').value = item.status;
+
+            document.getElementById('listing-modal').classList.remove('hidden');
+        }
+
+        function saveListingPayload(event) {
+            event.preventDefault();
+            const formId = document.getElementById('form-listing-id').value;
+            const game = document.getElementById('form-listing-game').value;
+            const type = document.getElementById('form-listing-type').value;
+            const title = document.getElementById('form-listing-title').value.trim();
+            const desc = document.getElementById('form-listing-desc').value.trim();
+            const price = parseFloat(document.getElementById('form-listing-price').value);
+            const img = document.getElementById('form-listing-img').value.trim();
+            const sellerId = document.getElementById('form-listing-seller-id').value.trim();
+            const seller = document.getElementById('form-listing-seller-name').value.trim();
+            const status = document.getElementById('form-listing-status').value;
+
+            let listings = getDBListings();
+
+            if (formId) {
+                // แก้ไขใบโพสต์ที่มีอยู่เดิม
+                listings = listings.map(l => l.id === formId ? { 
+                    id: formId, game, type, title, desc, price, img, sellerId, seller, status, date: l.date || "2026-06-09" 
+                } : l);
+                logSecurityIncident("SYSTEM_ADMIN", `Admin overwrote listing params: ${formId}`, "medium");
+                showToast(`อัปเดตสลักข้อมูลดีล ${formId} เรียบร้อย`, "success");
+            } else {
+                // เพิ่มสินค้าใหม่โดยตรงในคลังโดยแอดมิน
+                const newId = "LIST-" + Math.floor(100 + Math.random()*900);
+                listings.unshift({
+                    id: newId,
+                    game,
+                    type,
+                    title,
+                    desc,
+                    price,
+                    img: img || "https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=400&q=80",
+                    sellerId: sellerId || "SYSTEM",
+                    seller: seller || "SYSTEM_ADMIN",
+                    status,
+                    date: new Date().toISOString().substring(0, 10)
+                });
+                logSecurityIncident("SYSTEM_ADMIN", `Admin created premium product: ${newId}`, "low");
+                showToast(`สลักประกาศขายสินค้าพรีเมียมรหัส ${newId} โพสต์เรียบร้อย`, "success");
+            }
+
+            saveDBListings(listings);
+            closeListingModal();
+            renderAllScreens();
+        }
+
+        function deleteListing(id) {
+            if(!confirm(`ยืนยันการลบใบประกาศขายรหัส ${id} ออกจากเซิร์ฟเวอร์? ยอดเงินสะสมจะไม่ได้รับผลกระทบ`)) return;
+            const listings = getDBListings();
+            const remaining = listings.filter(l => l.id !== id);
+            saveDBListings(remaining);
+            logSecurityIncident("SYSTEM_ADMIN", `Deleted listing database token: ${id}`, "medium");
+            showToast("ลบข้อมูลประกาศฝากขายออกจากคลังเรียบร้อย", "warning");
+            renderAllScreens();
+        }
+
+
+        // --- 3. USER MODAL FLOWS ---
+        function openUserModal() {
+            document.getElementById('user-modal-title').innerText = "สร้างบัญชีผู้ใช้งานใหม่ในโหนด";
+            document.getElementById('form-user-uid').value = "";
+            document.getElementById('form-user-email').disabled = false;
+            document.getElementById('user-form').reset();
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+        function closeUserModal() { document.getElementById('user-modal').classList.add('hidden'); }
+
+        function editUser(uid) {
+            const users = getDBUsers();
+            const u = users.find(x => x.uid === uid);
+            if(!u) return;
+
+            document.getElementById('user-modal-title').innerText = "ปรับแต่งสิทธิ์ & กระเป๋าเงินผู้ใช้";
+            document.getElementById('form-user-uid').value = u.uid;
+            document.getElementById('form-user-fullname').value = u.fullname;
+            document.getElementById('form-user-email').value = u.email;
+            document.getElementById('form-user-email').disabled = true; // ล็อกอีเมลหลัก
+            document.getElementById('form-user-password').value = ""; // ไม่แสดงพาสปัจจุบันเพื่อความปลอดภัย
+            document.getElementById('form-user-role').value = u.role;
+            document.getElementById('form-user-status').value = u.status || "active";
+            document.getElementById('form-user-wallet').value = u.wallet;
+
+            document.getElementById('user-modal').classList.remove('hidden');
+        }
+
+        async function saveUserPayload(event) {
+            event.preventDefault();
+            const formUid = document.getElementById('form-user-uid').value;
+            const fullname = document.getElementById('form-user-fullname').value.trim();
+            const email = document.getElementById('form-user-email').value.trim();
+            const passwordInput = document.getElementById('form-user-password').value;
+            const role = document.getElementById('form-user-role').value;
+            const status = document.getElementById('form-user-status').value;
+            const wallet = parseFloat(document.getElementById('form-user-wallet').value);
+
+            let users = getDBUsers();
+
+            if (formUid) {
+                // เขียนข้อมูลโหนดที่มีอยู่เดิมทับ
+                const targetUser = users.find(x => x.uid === formUid);
+                if (targetUser) {
+                    targetUser.fullname = fullname;
+                    targetUser.role = role;
+                    targetUser.status = status;
+                    targetUser.wallet = wallet;
+
+                    // เปลี่ยนพาสเวิร์ดใหม่ถ้าแอดมินกรอก
+                    if (passwordInput.trim() !== "") {
+                        targetUser.passwordHash = await sha256(passwordInput);
+                    }
+                }
+                logSecurityIncident("SYSTEM_ADMIN", `Adjusted user profile and credits for UID: ${formUid}`, "high");
+                showToast(`อัปเดตสิทธิ์และเงินกระเป๋าของ ${fullname} สำเร็จ`, "success");
+            } else {
+                // สมัครยูสใหม่จากหลังบ้าน
+                if (users.find(u => u.email.toLowerCase() === email.toLowerCase())) {
+                    showToast("ที่อยู่อีเมลนี้ถูกเรียกใช้งานในเซิร์ฟเวอร์อยู่แล้ว", "error");
+                    return;
+                }
+                const passHash = await sha256(passwordInput || "user123456"); // พาสตั้งต้นถ้าไม่กรอก
+                const newUid = "NULL_USER_" + Math.floor(1000 + Math.random()*9000);
+                users.push({
+                    uid: newUid,
+                    email,
+                    passwordHash: passHash,
+                    fullname,
+                    role,
+                    wallet,
+                    status,
+                    regDate: new Date().toLocaleDateString('th-TH')
+                });
+                logSecurityIncident("SYSTEM_ADMIN", `Admin created new account node: ${email}`, "medium");
+                showToast(`จดทะเบียนผู้ใช้ ${fullname} เรียบร้อยแล้ว`, "success");
+            }
+
+            saveDBUsers(users);
+            closeUserModal();
+            renderAllScreens();
+        }
+
+
+        // --- ระบบล้างประวัติจำลองแบบคลีน (Hard Reset) ---
+        function hardResetSystem() {
+            if(confirm("❗ คุณต้องการทำความสะอาดและล้างฐานข้อมูลระบบจำลองทั้งหมด (LocalStorage Hard Reset) ใช่หรือไม่? ประวัติตลาดและแชทคนกลางทั้งหมดจะกลับสู่ค่าเริ่มต้นโรงงาน")) {
+                localStorage.clear();
+                alert("ระบบทำการทำความสะอาดล้างเครื่องเรียบร้อยแล้ว! หน้าจอจะรีเซ็ตข้อมูลใหม่ทั้งหมด");
+                window.location.reload();
+            }
+        }
+
+        // --- ระบบสแกนหาข้อมูลไอพีเครือข่ายจำลองของโหนด ---
+        function fetchLocalGatewayGeo() {
+            fetch('https://api.ipify.org?format=json')
+                .then(r => r.json())
+                .then(data => {
+                    document.getElementById('env-ip').innerText = data.ip;
+                })
+                .catch(() => {
+                    document.getElementById('env-ip').innerText = "182.52.231.14 (ISP Gateway)";
+                });
+        }
+
+        // ดักเริ่มทำงานเมื่อหน้าเว็บเสร็จสมบูรณ์
+        window.onload = function() {
+            fetchLocalGatewayGeo();
+            renderAllScreens();
+
+            // ดักสแกนข้อมูลอัปเดตจริงจากเบราว์เซอร์ผู้ใช้สากลอัตโนมัติทุกๆ 3.5 วินาที
+            setInterval(() => {
+                if (activeTab === 'dashboard') renderDashboard();
+                else if (activeTab === 'listings') renderListings();
+                else if (activeTab === 'escrow') {
+                    renderEscrowContracts();
+                    if(activeChatContractId) renderLiveChatLogs();
+                }
+            }, 3500);
+        }
+    </script>
+</body>
+</html>
