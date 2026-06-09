@@ -1,0 +1,16 @@
+{
+  "name": "null-core",
+  "version": "1.0.0",
+  "description": "NULL CORE - Safe trading platform with Escrow Plus system",
+  "main": "index.html",
+  "scripts": {
+    "build": "echo 'No build step required for static HTML'",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": ["trading", "escrow", "marketplace"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@vercel/speed-insights": "^1.0.14"
+  }
+}
