@@ -1,691 +1,33 @@
-import React, { useState, useEffect } from 'react';
-import { initializeApp } from 'firebase/app';
-import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from 'firebase/auth';
-import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, addDoc } from 'firebase/firestore';
-
-// --- Firebase Setup (Required for Canvas) ---
-const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
-const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-
-// --- Language Dictionary ---
-const translations = {
-  th: {
-    home: "หน้าหลัก", shop: "ร้านค้า", topup: "เติมเงิน", admin: "จัดการระบบ (Admin)",
-    login: "เข้าสู่ระบบ / ลงทะเบียน", username: "ชื่อผู้ใช้", password: "รหัสผ่าน",
-    enter_username: "กรอกชื่อผู้ใช้ของคุณ", enter_password: "กรอกรหัสผ่าน",
-    submit_login: "เข้าสู่ระบบ", logout: "ออกจากระบบ",
-    points: "พอยท์", balance: "ยอดคงเหลือ",
-    search: "ค้นหาสินค้า...", buy: "ซื้อเลย", 
-    days1: "1 วัน", days7: "7 วัน", days15: "15 วัน", days30: "30 วัน",
-    upload_slip: "อัปโหลดสลิป", amount: "จำนวนเงิน", submit_topup: "แจ้งโอนเงิน",
-    scan_qr: "สแกน QR Code นี้เพื่อโอนเงิน",
-    history: "ประวัติการเติมเงิน", status: "สถานะ", pending: "รอตรวจสอบ", approved: "สำเร็จ",
-    my_codes: "โค้ด/ไฟล์ ของฉัน", reveal_code: "ดูโค้ด",
-    admin_panel: "ระบบหลังบ้าน", approve: "อนุมัติ", reject: "ปฏิเสธ",
-    no_products: "ไม่พบสินค้า", success_buy: "สั่งซื้อสำเร็จ! ไปที่หน้าแรกเพื่อดูโค้ด",
-    insufficient_points: "พอยท์ไม่เพียงพอ กรุณาเติมเงิน"
-  },
-  en: {
-    home: "Home", shop: "Shop", topup: "Top-up", admin: "Admin Panel",
-    login: "Login / Register", username: "Username", password: "Password",
-    enter_username: "Enter your username", enter_password: "Enter password",
-    submit_login: "Login", logout: "Logout",
-    points: "Points", balance: "Balance",
-    search: "Search products...", buy: "Buy Now",
-    days1: "1 Day", days7: "7 Days", days15: "15 Days", days30: "30 Days",
-    upload_slip: "Upload Slip", amount: "Amount", submit_topup: "Submit Top-up",
-    scan_qr: "Scan this QR Code to pay",
-    history: "Top-up History", status: "Status", pending: "Pending", approved: "Approved",
-    my_codes: "My Codes/Files", reveal_code: "Reveal Code",
-    admin_panel: "Backend System", approve: "Approve", reject: "Reject",
-    no_products: "No products found", success_buy: "Purchase successful! Check Home for codes.",
-    insufficient_points: "Insufficient points. Please top-up."
-  }
-};
-
-// --- Mock Products ---
-const initialProducts = [
-  { id: 'p1', name: 'VIP Script - Daily', price: 50, duration: 1, type: 'days1', desc: 'Full access for 24 hours.' },
-  { id: 'p2', name: 'VIP Script - Weekly', price: 300, duration: 7, type: 'days7', desc: 'Full access for 7 days. Best value!' },
-  { id: 'p3', name: 'VIP Script - Half Month', price: 550, duration: 15, type: 'days15', desc: 'Full access for 15 days.' },
-  { id: 'p4', name: 'VIP Script - Monthly', price: 1000, duration: 30, type: 'days30', desc: 'Full access for 30 days. Premium support.' },
-];
-
-export default function App() {
-  const [user, setUser] = useState(null);
-  const [lang, setLang] = useState('th');
-  const [page, setPage] = useState('login');
-  const t = translations[lang];
-
-  // App State
-  const [profile, setProfile] = useState({ username: '', points: 0, role: 'user', inventory: [] });
-  const [topups, setTopups] = useState([]);
-  const [allUsers, setAllUsers] = useState([]); // For admin
-  
-  // Form State
-  const [loginName, setLoginName] = useState('');
-  const [topupAmount, setTopupAmount] = useState('');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [bgLoaded, setBgLoaded] = useState(false);
-
-  // 1. Init Auth
-  useEffect(() => {
-    const initAuth = async () => {
-      try {
-        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-          await signInWithCustomToken(auth, __initial_auth_token);
-        } else {
-          await signInAnonymously(auth);
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NULL DEVELOPER - Web Shop & Top-up</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Import Map สำหรับกำหนดเส้นทาง ES Modules ของ React และ JSX Runtime -->
+    <script type="importmap">
+    {
+        "imports": {
+            "react": "https://esm.sh/react@18.3.1",
+            "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+            "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime"
         }
-      } catch (e) {
-        console.error("Auth error:", e);
-      }
-    };
-    initAuth();
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    }
+    </script>
+
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
     
-    // Simulate background loading
-    setTimeout(() => setBgLoaded(true), 500);
-
-    return () => unsubscribe();
-  }, []);
-
-  // 2. Fetch Data
-  useEffect(() => {
-    if (!user) return;
-
-    // We use a public profile collection here so Admin can see and edit everyone
-    const profileRef = collection(db, 'artifacts', appId, 'public', 'data', 'profiles');
-    const topupRef = collection(db, 'artifacts', appId, 'public', 'data', 'topups');
-
-    const unsubProfile = onSnapshot(profileRef, (snapshot) => {
-      const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAllUsers(profiles);
-      const myProfile = profiles.find(p => p.id === user.uid);
-      if (myProfile) {
-        setProfile(myProfile);
-      }
-    }, (err) => console.error(err));
-
-    const unsubTopup = onSnapshot(topupRef, (snapshot) => {
-      const tps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setTopups(tps);
-    }, (err) => console.error(err));
-
-    return () => { unsubProfile(); unsubTopup(); };
-  }, [user]);
-
-  // Actions
-  const handleLogin = async () => {
-    if (!loginName.trim()) return;
-    if (!user) return;
-
-    // Check if profile exists, if not create it
-    const existing = allUsers.find(p => p.username === loginName);
-    if (!existing) {
-      const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid);
-      await setDoc(docRef, {
-        username: loginName,
-        points: 0,
-        role: loginName.toLowerCase() === 'admin' ? 'admin' : 'user', // Auto admin for demo
-        inventory: []
-      });
-    } else if (existing.id !== user.uid) {
-        // Just simulating login in this demo environment
-        setProfile(existing);
-    }
-    setPage('home');
-  };
-
-  const handleTopup = async () => {
-    if (!topupAmount || isNaN(topupAmount)) return;
-    const ref = collection(db, 'artifacts', appId, 'public', 'data', 'topups');
-    await addDoc(ref, {
-      userId: user.uid,
-      username: profile.username,
-      amount: Number(topupAmount),
-      status: 'pending',
-      timestamp: new Date().toISOString()
-    });
-    setTopupAmount('');
-    alert(lang === 'th' ? 'ส่งหลักฐานเรียบร้อย รอแอดมินตรวจสอบ' : 'Proof submitted. Waiting for approval.');
-    // *In reality, here is where you trigger the Discord Webhook*
-  };
-
-  const handleBuy = async (product) => {
-    if (profile.points < product.price) {
-      alert(t.insufficient_points);
-      return;
-    }
-
-    // Deduct points and generate code
-    const newPoints = profile.points - product.price;
-    const generatedCode = `VIP-${product.duration}D-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
-    const newInventory = [...(profile.inventory || []), {
-      productName: product.name,
-      code: generatedCode,
-      boughtAt: new Date().toISOString()
-    }];
-
-    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid);
-    await updateDoc(docRef, {
-      points: newPoints,
-      inventory: newInventory
-    });
-    alert(t.success_buy);
-  };
-
-  const adminApproveTopup = async (topupId, userId, amount) => {
-    // 1. Update topup status
-    const tpRef = doc(db, 'artifacts', appId, 'public', 'data', 'topups', topupId);
-    await updateDoc(tpRef, { status: 'approved' });
-
-    // 2. Add points to user
-    const userToUpdate = allUsers.find(u => u.id === userId);
-    if (userToUpdate) {
-      const uRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', userId);
-      await updateDoc(uRef, { points: userToUpdate.points + amount });
-    }
-  };
-
-  // --- Components ---
-  const Navbar = () => (
-    <nav className="fixed w-full z-50 top-0 transition-all duration-300 bg-[#060d1a]/80 backdrop-blur-md border-b border-[#143261] shadow-[0_4px_30px_rgba(0,210,255,0.15)]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-20">
-          <div className="flex gap-8 items-center">
-            {/* 3D Logo Effect */}
-            <div className="relative group cursor-pointer" onClick={() => setPage('home')}>
-                <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-400 rounded-lg blur opacity-25 group-hover:opacity-75 transition duration-1000 group-hover:duration-200"></div>
-                <div className="relative flex items-center gap-3 bg-[#0a1526] px-4 py-2 rounded-lg border border-[#1a3d75] shadow-[inset_0_1px_1px_rgba(255,255,255,0.1)]">
-                    <img src="NULL2.jpg" alt="NULL DEVELOPER" className="h-10 w-10 object-contain rounded-full border-2 border-cyan-400 shadow-[0_0_10px_rgba(0,255,255,0.5)] transform group-hover:scale-110 transition-transform duration-300" />
-                    <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-blue-600 tracking-wider" style={{ textShadow: '0px 2px 4px rgba(0,0,0,0.5)' }}>NULL<span className="text-gray-300 font-light text-lg">DEV</span></span>
-                </div>
-            </div>
-
-            {profile.username && (
-              <div className="hidden md:flex gap-2 bg-[#0a1526] p-1.5 rounded-2xl border border-[#143261] shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
-                {[
-                  { id: 'home', label: t.home, icon: '🏠' },
-                  { id: 'shop', label: t.shop, icon: '🛒' },
-                  { id: 'topup', label: t.topup, icon: '💳' },
-                ].map((item) => (
-                    <button 
-                        key={item.id}
-                        onClick={() => setPage(item.id)} 
-                        className={`px-5 py-2 rounded-xl transition-all duration-300 font-medium flex items-center gap-2
-                            ${page === item.id 
-                                ? 'bg-gradient-to-b from-blue-500 to-blue-700 text-white shadow-[0_4px_15px_rgba(0,120,255,0.5)] border border-blue-400 transform -translate-y-1' 
-                                : 'text-gray-400 hover:text-cyan-300 hover:bg-[#12284c] border border-transparent'
-                            }`}
-                    >
-                        <span>{item.icon}</span> {item.label}
-                    </button>
-                ))}
-                {profile.role === 'admin' && (
-                  <button onClick={() => setPage('admin')} className={`px-5 py-2 rounded-xl font-medium flex items-center gap-2 transition-all duration-300 ${page==='admin' ? 'bg-gradient-to-b from-red-600 to-red-800 text-white shadow-[0_4px_15px_rgba(255,0,0,0.4)] border border-red-500 transform -translate-y-1' : 'text-red-400 hover:text-red-300 hover:bg-[#2a0e14] border border-transparent'}`}>
-                    ⚙️ {t.admin}
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-          <div className="flex gap-4 items-center">
-            <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')} className="bg-[#12284c] hover:bg-[#1a3d75] text-cyan-300 px-3 py-1.5 rounded-lg text-sm font-bold border border-[#1a3d75] shadow-[0_2px_8px_rgba(0,0,0,0.3)] transition-colors">
-              {lang === 'th' ? 'EN' : 'TH'}
-            </button>
-            {profile.username && (
-              <div className="flex items-center gap-4 bg-[#0a1526] p-1.5 pr-4 rounded-full border border-[#143261] shadow-[inset_0_2px_4px_rgba(0,0,0,0.4)]">
-                <div className="bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-1.5 rounded-full text-sm font-bold text-white shadow-[0_0_10px_rgba(0,200,255,0.4)] flex items-center gap-2">
-                    <span className="text-yellow-300">💎</span>
-                    {profile.points.toLocaleString()} {t.points}
-                </div>
-                <div className="flex flex-col">
-                    <span className="text-xs text-gray-400">Welcome,</span>
-                    <span className="text-sm font-bold text-cyan-100">{profile.username}</span>
-                </div>
-                <button onClick={() => {setProfile({username:'', points:0}); setPage('login');}} className="ml-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded-full transition-colors" title={t.logout}>
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-    </nav>
-  );
-
-  // --- Pages ---
-  if (page === 'login' || !profile.username) {
-    return (
-      <div className={`min-h-screen bg-[#030712] flex flex-col font-sans text-gray-200 transition-opacity duration-1000 ${bgLoaded ? 'opacity-100' : 'opacity-0'}`} style={{backgroundImage: 'radial-gradient(circle at 50% 50%, #0a1526 0%, #030712 100%)'}}>
-        {/* Background Decorative Elements */}
-        <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
-            <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-600 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse"></div>
-            <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-cyan-400 rounded-full mix-blend-screen filter blur-[120px] opacity-20 animate-pulse" style={{animationDelay: '2s'}}></div>
-        </div>
-
-        <Navbar />
-        <div className="flex-1 flex items-center justify-center relative z-10 px-4 mt-20">
-          <div className="bg-[#0a1526]/80 backdrop-blur-xl p-10 rounded-3xl shadow-[0_0_50px_rgba(0,100,255,0.15)] w-full max-w-md border border-[#1a3d75] relative overflow-hidden transform perspective-1000 hover:rotate-x-2 transition-transform duration-500">
-            {/* Inner glow */}
-            <div className="absolute -inset-1 bg-gradient-to-b from-blue-500/20 to-transparent pointer-events-none"></div>
-            
-            <div className="text-center mb-8 relative z-10">
-                <img src="NULL2.jpg" alt="Logo" className="w-24 h-24 mx-auto rounded-full border-4 border-[#1a3d75] shadow-[0_0_20px_rgba(0,255,255,0.3)] mb-4" />
-                <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 drop-shadow-sm">{t.login}</h2>
-                <p className="text-gray-400 mt-2 text-sm">เข้าสู่ระบบเพื่อใช้งาน NULL Developer Services</p>
-            </div>
-
-            <div className="space-y-5 relative z-10">
-                <div>
-                    <label className="block text-sm font-medium text-cyan-200 mb-1.5 ml-1">{t.username}</label>
-                    <div className="relative">
-                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500">👤</span>
-                        </div>
-                        <input 
-                            type="text" placeholder={t.enter_username} value={loginName}
-                            onChange={e => setLoginName(e.target.value)}
-                            onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                            className="w-full pl-10 pr-4 py-3.5 bg-[#030712] border border-[#1a3d75] rounded-xl text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] transition-all"
-                        />
-                    </div>
-                </div>
-                <div>
-                    <label className="block text-sm font-medium text-cyan-200 mb-1.5 ml-1">{t.password}</label>
-                    <div className="relative">
-                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                            <span className="text-gray-500">🔒</span>
-                        </div>
-                        <input 
-                            type="password" placeholder={t.enter_password}
-                            onKeyDown={e => e.key === 'Enter' && handleLogin()}
-                            className="w-full pl-10 pr-4 py-3.5 bg-[#030712] border border-[#1a3d75] rounded-xl text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] transition-all"
-                        />
-                    </div>
-                </div>
-                <button onClick={handleLogin} className="w-full relative group mt-4">
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-200"></div>
-                    <div className="relative w-full bg-gradient-to-b from-blue-500 to-blue-700 text-white font-bold py-3.5 rounded-xl border border-blue-400 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] flex justify-center items-center gap-2 uppercase tracking-wide">
-                        {t.submit_login} <svg className="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
-                    </div>
-                </button>
-            </div>
-            <p className="text-xs text-gray-500 mt-6 text-center border-t border-[#1a3d75] pt-4 relative z-10">Hint: Type "admin" as username to see Admin Panel.</p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const renderHome = () => (
-    <div className="max-w-5xl mx-auto mt-28 animate-[fadeIn_0.5s_ease-out]">
-      {/* 3D Dashboard Card */}
-      <div className="relative mb-10 group perspective-1000">
-        <div className="absolute -inset-1 bg-gradient-to-r from-blue-600 via-cyan-400 to-blue-600 rounded-2xl blur opacity-20 group-hover:opacity-40 transition duration-500"></div>
-        <div className="relative bg-[#0a1526]/90 backdrop-blur-lg p-8 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#1a3d75] transform transition-transform duration-500 group-hover:rotate-x-1 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
-             {/* Decorative tech pattern */}
-             <div className="absolute inset-0 opacity-5 pointer-events-none" style={{ backgroundImage: 'radial-gradient(#4fd1c5 1px, transparent 1px)', backgroundSize: '20px 20px' }}></div>
-            
-            <div className="flex items-center gap-6 z-10">
-                <div className="relative">
-                    <img src="NULL2.jpg" className="w-24 h-24 rounded-2xl border-2 border-cyan-500 shadow-[0_0_30px_rgba(0,255,255,0.3)] object-cover" alt="Profile" />
-                    <div className="absolute -bottom-2 -right-2 bg-green-500 w-6 h-6 rounded-full border-4 border-[#0a1526] shadow-[0_0_10px_rgba(0,255,0,0.5)]"></div>
-                </div>
-                <div>
-                    <h2 className="text-3xl font-black text-white mb-1 tracking-tight">ยินดีต้อนรับ, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">{profile.username}</span>!</h2>
-                    <p className="text-gray-400 flex items-center gap-2">
-                        <span className="inline-block w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        ระบบออนไลน์และพร้อมใช้งาน
-                    </p>
-                </div>
-            </div>
-            <div className="bg-[#030712] p-5 rounded-2xl border border-[#1a3d75] shadow-[inset_0_2px_10px_rgba(0,0,0,0.5)] min-w-[200px] text-center z-10 relative overflow-hidden group/balance">
-                 <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-cyan-400 to-blue-600 transform -translate-x-full group-hover/balance:translate-x-0 transition-transform duration-500"></div>
-                <p className="text-gray-400 text-sm font-medium mb-1 uppercase tracking-wider">{t.balance}</p>
-                <p className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-yellow-600 drop-shadow-md">
-                    {profile.points.toLocaleString()} <span className="text-xl text-yellow-600">{t.points}</span>
-                </p>
-            </div>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-3 mb-6">
-        <div className="h-8 w-1.5 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(0,255,255,0.5)]"></div>
-        <h3 className="text-2xl font-bold text-white tracking-wide">{t.my_codes}</h3>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {(!profile.inventory || profile.inventory.length === 0) ? (
-          <div className="col-span-full bg-[#0a1526]/50 p-10 rounded-2xl border border-dashed border-[#1a3d75] flex flex-col items-center justify-center text-center">
-            <span className="text-6xl mb-4 opacity-50 grayscale">📦</span>
-            <p className="text-gray-400 text-lg">ยังไม่มีสินค้าในคลังของคุณ</p>
-            <button onClick={() => setPage('shop')} className="mt-4 px-6 py-2 bg-[#12284c] hover:bg-[#1a3d75] text-cyan-300 rounded-lg border border-cyan-900 transition-colors">
-                ไปที่ร้านค้า
-            </button>
-          </div>
-        ) : (
-          profile.inventory.map((item, idx) => (
-            <div key={idx} className="relative group perspective-1000">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-900 to-[#0a1526] rounded-2xl transform transition-transform duration-300 group-hover:-translate-y-2 group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.5)] border border-[#1a3d75]"></div>
-                <div className="relative p-6 rounded-2xl transform transition-transform duration-300 group-hover:-translate-y-2 flex flex-col h-full z-10">
-                    <div className="flex justify-between items-start mb-4">
-                        <div>
-                            <h4 className="font-black text-lg text-cyan-100 drop-shadow-sm">{item.productName}</h4>
-                            <p className="text-xs text-blue-400/80 font-medium mt-1 bg-blue-900/30 inline-block px-2 py-0.5 rounded">
-                                Date: {new Date(item.boughtAt).toLocaleDateString()}
-                            </p>
-                        </div>
-                        <div className="bg-[#030712] p-2 rounded-lg border border-[#1a3d75] shadow-inner">
-                            <span className="text-2xl">🔑</span>
-                        </div>
-                    </div>
-                    <div className="mt-auto">
-                        <label className="text-xs text-gray-500 uppercase tracking-wider mb-1 block">License Key</label>
-                        <div className="bg-[#030712] p-3 rounded-xl font-mono text-green-400 border border-green-900/50 shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] flex justify-between items-center group/code cursor-pointer relative overflow-hidden" onClick={() => {navigator.clipboard.writeText(item.code); alert('คัดลอกโค้ดแล้ว!');}}>
-                            <div className="absolute inset-0 bg-green-400/10 transform -translate-x-full group-hover/code:translate-x-0 transition-transform duration-300"></div>
-                            <span className="relative z-10 tracking-wider truncate mr-2">{item.code}</span>
-                            <span className="relative z-10 text-gray-500 hover:text-white transition-colors" title="Copy to clipboard">📋</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-          ))
-        )}
-      </div>
-    </div>
-  );
-
-  const renderShop = () => {
-    const filtered = initialProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase()));
-    return (
-      <div className="max-w-6xl mx-auto mt-28 animate-[fadeIn_0.5s_ease-out]">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-10 gap-4">
-           <div className="flex items-center gap-3">
-                <div className="h-10 w-2 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full shadow-[0_0_15px_rgba(0,255,255,0.6)]"></div>
-                <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{t.shop}</h2>
-            </div>
-            
-            <div className="relative w-full md:w-96 group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="h-5 w-5 text-cyan-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
-                </div>
-                <input 
-                    type="text" placeholder={t.search} value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-12 pr-4 py-3 bg-[#0a1526]/80 backdrop-blur-sm border border-[#1a3d75] rounded-2xl text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 shadow-[inset_0_2px_5px_rgba(0,0,0,0.5)] transition-all"
-                />
-                <div className="absolute inset-0 rounded-2xl ring-1 ring-cyan-400/0 group-hover:ring-cyan-400/30 transition-all pointer-events-none"></div>
-            </div>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {filtered.length > 0 ? filtered.map((p, i) => (
-            <div key={p.id} className="relative group perspective-1000" style={{ animationDelay: `${i * 100}ms` }}>
-              {/* 3D Card Hover Effect background */}
-              <div className="absolute -inset-0.5 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-3xl blur opacity-0 group-hover:opacity-40 transition duration-500 transform group-hover:scale-105"></div>
-              
-              <div className="relative bg-[#0a1526] rounded-3xl overflow-hidden shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-[#1a3d75] flex flex-col h-full transform transition-all duration-500 group-hover:-translate-y-3 group-hover:rotate-y-2 z-10">
-                {/* 3D Header Section */}
-                <div className="relative h-40 flex items-center justify-center overflow-hidden bg-[#030712]">
-                    <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20 mix-blend-overlay"></div>
-                    <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-blue-600 rounded-full blur-[40px] opacity-50"></div>
-                    <div className="absolute -top-10 -left-10 w-32 h-32 bg-cyan-400 rounded-full blur-[40px] opacity-30"></div>
-                    
-                    {/* Glowing text effect */}
-                    <div className="relative z-10 text-center transform group-hover:scale-110 transition-transform duration-500">
-                        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-blue-200 drop-shadow-[0_0_15px_rgba(255,255,255,0.5)] tracking-tighter">
-                            {p.type.replace('days', '')}
-                        </span>
-                        <span className="block text-xl font-bold text-cyan-300 uppercase tracking-widest mt-1">Days</span>
-                    </div>
-                </div>
-
-                <div className="p-6 flex flex-col flex-grow relative bg-gradient-to-b from-[#0a1526] to-[#030712]">
-                  <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-1 bg-gradient-to-r from-cyan-400 to-blue-600 blur-sm rounded-full"></div>
-                  
-                  <h3 className="font-black text-xl mb-2 text-white group-hover:text-cyan-300 transition-colors">{p.name}</h3>
-                  <p className="text-sm text-gray-400 mb-6 flex-grow leading-relaxed">{p.desc}</p>
-                  
-                  <div className="flex flex-col gap-4 mt-auto">
-                    <div className="bg-[#030712] p-3 rounded-xl border border-[#1a3d75] shadow-inner text-center">
-                         <span className="text-sm text-gray-500 block mb-1">ราคา</span>
-                         <span className="text-2xl font-black text-yellow-400 drop-shadow-[0_0_8px_rgba(250,204,21,0.4)]">{p.price.toLocaleString()} <span className="text-base text-yellow-600">Pts</span></span>
-                    </div>
-                    <button 
-                        onClick={() => handleBuy(p)} 
-                        className="relative w-full overflow-hidden rounded-xl p-[1px] group/btn"
-                    >
-                        <span className="absolute inset-0 bg-gradient-to-r from-cyan-400 via-blue-500 to-blue-700 rounded-xl opacity-70 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
-                        <div className="relative bg-[#0a1526] px-4 py-3 rounded-xl flex items-center justify-center gap-2 group-hover/btn:bg-transparent transition-colors duration-300">
-                             <span className="font-bold text-white uppercase tracking-wider group-hover/btn:text-white">{t.buy}</span>
-                             <svg className="w-5 h-5 text-cyan-400 group-hover/btn:text-white transform group-hover/btn:translate-x-1 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-                        </div>
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )) : (
-            <div className="col-span-full py-20 text-center">
-                <span className="text-6xl opacity-20 block mb-4">🔍</span>
-                <p className="text-gray-500 text-xl font-medium">{t.no_products}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  };
-
-  const renderTopup = () => {
-    const myTopups = topups.filter(t => t.userId === user.uid);
-    return (
-      <div className="max-w-5xl mx-auto mt-28 animate-[fadeIn_0.5s_ease-out]">
-         <div className="flex items-center gap-3 mb-10">
-            <div className="h-10 w-2 bg-gradient-to-b from-green-400 to-emerald-600 rounded-full shadow-[0_0_15px_rgba(16,185,129,0.6)]"></div>
-            <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">{t.topup}</h2>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            {/* Payment Section (3D Card) */}
-            <div className="lg:col-span-5 relative group perspective-1000">
-                <div className="absolute -inset-1 bg-gradient-to-b from-green-500 to-blue-600 rounded-3xl blur opacity-20 transition duration-500"></div>
-                <div className="relative bg-[#0a1526]/90 backdrop-blur-xl p-8 rounded-3xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#1a3d75] z-10 flex flex-col h-full">
-                    
-                    <div className="bg-gradient-to-br from-white to-gray-200 p-6 rounded-2xl mb-8 flex flex-col items-center justify-center relative overflow-hidden shadow-[0_10px_20px_rgba(255,255,255,0.1)] transform transition-transform hover:scale-[1.02]">
-                        <div className="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')]"></div>
-                        
-                        {/* Fake PromptPay/QR Logo area */}
-                        <div className="w-full flex justify-between items-center mb-4 relative z-10">
-                            <span className="text-blue-900 font-black text-xl tracking-tighter">PROMPTPAY</span>
-                            <span className="text-gray-500 text-xs font-bold bg-gray-200 px-2 py-1 rounded">QR SCAN</span>
-                        </div>
-                        
-                        {/* Placeholder for QR Code */}
-                        <div className="w-48 h-48 bg-white border-4 border-blue-900 rounded-xl flex items-center justify-center p-2 relative z-10 shadow-inner">
-                            <div className="w-full h-full border-2 border-dashed border-gray-300 flex flex-col items-center justify-center text-center">
-                                <span className="text-4xl mb-2">📱</span>
-                                <span className="text-xs font-bold text-gray-500 uppercase">{t.scan_qr}</span>
-                            </div>
-                        </div>
-                        <p className="mt-4 text-sm font-bold text-gray-700 relative z-10 text-center">พร้อมเพย์: 080-XXX-XXXX<br/><span className="text-xs font-normal">บจก. นัล เดเวลลอปเปอร์</span></p>
-                    </div>
-                    
-                    <div className="space-y-5 mt-auto">
-                        <div>
-                            <label className="block text-sm font-bold text-cyan-200 mb-2 ml-1">{t.amount} (บาท)</label>
-                            <div className="relative">
-                                <span className="absolute inset-y-0 left-0 pl-4 flex items-center text-gray-400 font-bold">฿</span>
-                                <input 
-                                    type="number" value={topupAmount} onChange={e => setTopupAmount(e.target.value)}
-                                    className="w-full pl-10 pr-4 py-3 bg-[#030712] border border-[#1a3d75] rounded-xl text-white font-bold text-lg focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] transition-all" 
-                                    placeholder="0.00"
-                                />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            <label className="block text-sm font-bold text-cyan-200 mb-2 ml-1">{t.upload_slip}</label>
-                            <div className="relative border-2 border-dashed border-[#1a3d75] rounded-xl bg-[#030712] hover:border-cyan-400 transition-colors p-4 text-center cursor-pointer group/upload">
-                                <input type="file" className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
-                                <span className="text-3xl block mb-2 group-hover/upload:scale-110 transition-transform">📄</span>
-                                <span className="text-sm text-gray-400 font-medium">คลิกเพื่ออัปโหลด หรือลากไฟล์มาวาง</span>
-                            </div>
-                        </div>
-                        
-                        <button onClick={handleTopup} className="w-full relative group mt-4">
-                            <div className="absolute -inset-0.5 bg-gradient-to-r from-green-400 to-emerald-600 rounded-xl blur opacity-60 group-hover:opacity-100 transition duration-200"></div>
-                            <div className="relative w-full bg-gradient-to-b from-green-500 to-green-700 text-white font-black py-4 rounded-xl border border-green-400 shadow-[inset_0_1px_1px_rgba(255,255,255,0.3)] flex justify-center items-center gap-2 uppercase tracking-widest text-lg">
-                                {t.submit_topup} <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                            </div>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            {/* History Section */}
-            <div className="lg:col-span-7 bg-[#0a1526]/50 backdrop-blur-md p-8 rounded-3xl border border-[#1a3d75] flex flex-col h-[600px]">
-                <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#1a3d75]">
-                    <span className="p-2 bg-[#12284c] rounded-lg">📜</span>
-                    <h2 className="text-2xl font-bold text-white">{t.history}</h2>
-                </div>
-                
-                <div className="flex-1 overflow-y-auto pr-2 space-y-4 custom-scrollbar">
-                    {myTopups.length === 0 ? (
-                        <div className="h-full flex flex-col items-center justify-center opacity-50">
-                            <span className="text-5xl mb-4">📭</span>
-                            <p className="text-lg">ยังไม่มีประวัติการทำรายการ</p>
-                        </div>
-                    ) : (
-                        myTopups.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(tp => (
-                        <div key={tp.id} className="relative group perspective-1000">
-                            <div className="absolute inset-0 bg-gradient-to-r from-[#12284c] to-[#0a1526] rounded-xl transform transition-transform duration-300 group-hover:scale-[1.01] border border-[#1a3d75]"></div>
-                            <div className="relative flex justify-between items-center p-5 z-10">
-                                <div className="flex items-center gap-4">
-                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-lg border-2 ${tp.status === 'approved' ? 'bg-green-900/50 text-green-400 border-green-500/50 shadow-[0_0_15px_rgba(0,255,0,0.2)]' : 'bg-yellow-900/50 text-yellow-400 border-yellow-500/50 shadow-[0_0_15px_rgba(255,255,0,0.2)]'}`}>
-                                        ฿
-                                    </div>
-                                    <div>
-                                        <div className="font-black text-xl text-white">{tp.amount.toLocaleString()} <span className="text-sm text-gray-400 font-normal">THB</span></div>
-                                        <div className="text-sm text-cyan-500/70 font-mono mt-1">{new Date(tp.timestamp).toLocaleString('th-TH')}</div>
-                                    </div>
-                                </div>
-                                <div className={`px-4 py-1.5 text-sm rounded-full font-bold uppercase tracking-wider border backdrop-blur-sm flex items-center gap-2 ${
-                                    tp.status === 'approved' 
-                                        ? 'bg-green-900/30 text-green-400 border-green-500/50' 
-                                        : 'bg-yellow-900/30 text-yellow-400 border-yellow-500/50 animate-pulse'
-                                    }`}>
-                                    <span className={`w-2 h-2 rounded-full ${tp.status === 'approved' ? 'bg-green-400' : 'bg-yellow-400'}`}></span>
-                                    {tp.status === 'approved' ? t.approved : t.pending}
-                                </div>
-                            </div>
-                        </div>
-                        ))
-                    )}
-                </div>
-            </div>
-        </div>
-      </div>
-    );
-  };
-
-  const renderAdmin = () => {
-    if (profile.role !== 'admin') return <div className="mt-28 text-center text-red-500 text-2xl font-bold">Access Denied: Admin Only</div>;
-    const pendingTopups = topups.filter(t => t.status === 'pending');
-    
-    return (
-      <div className="max-w-6xl mx-auto mt-28 space-y-8 animate-[fadeIn_0.5s_ease-out]">
-        <div className="flex items-center gap-3 mb-6">
-            <div className="h-10 w-2 bg-gradient-to-b from-red-500 to-red-800 rounded-full shadow-[0_0_15px_rgba(239,68,68,0.6)]"></div>
-            <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-400">Admin Control Panel</h2>
-        </div>
-
-        {/* Pending Requests */}
-        <div className="relative group">
-          <div className="absolute -inset-1 bg-gradient-to-r from-red-900 to-[#0a1526] rounded-3xl blur opacity-30"></div>
-          <div className="relative bg-[#0a1526]/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-red-900/50">
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold text-red-400 flex items-center gap-2">
-                    <span className="relative flex h-3 w-3 mr-2">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                      <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
-                    </span>
-                    คำขอเติมเงินที่รออนุมัติ ({pendingTopups.length})
-                </h2>
-            </div>
-            
-            <div className="overflow-x-auto rounded-xl border border-[#1a3d75] bg-[#030712]">
-              <table className="w-full text-left">
-                <thead className="bg-[#12284c] text-cyan-300 font-bold uppercase text-xs tracking-wider">
-                  <tr>
-                    <th className="px-6 py-4">User</th>
-                    <th className="px-6 py-4">Amount</th>
-                    <th className="px-6 py-4">Date</th>
-                    <th className="px-6 py-4 text-right">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1a3d75]">
-                  {pendingTopups.length === 0 ? <tr><td colSpan="4" className="px-6 py-8 text-center text-gray-500 font-medium">ไม่มีคำขอรออนุมัติ</td></tr> : 
-                    pendingTopups.map(tp => (
-                    <tr key={tp.id} className="hover:bg-[#0a1526] transition-colors">
-                      <td className="px-6 py-4 font-bold text-white flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-xs">👤</div>
-                          {tp.username}
-                      </td>
-                      <td className="px-6 py-4 font-black text-green-400 text-lg">{tp.amount.toLocaleString()} ฿</td>
-                      <td className="px-6 py-4 text-sm text-gray-400 font-mono">{new Date(tp.timestamp).toLocaleString()}</td>
-                      <td className="px-6 py-4 text-right">
-                        <button onClick={() => adminApproveTopup(tp.id, tp.userId, tp.amount)} className="bg-gradient-to-r from-green-600 to-emerald-600 px-4 py-2 rounded-lg text-sm font-bold text-white hover:shadow-[0_0_15px_rgba(16,185,129,0.5)] transform hover:-translate-y-0.5 transition-all">
-                            อนุมัติ (ให้พอยท์)
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        {/* User Database */}
-        <div className="bg-[#0a1526]/90 backdrop-blur-md p-8 rounded-3xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] border border-[#1a3d75]">
-          <h2 className="text-2xl font-bold mb-6 text-white">ฐานข้อมูลผู้ใช้ระบบ</h2>
-          <div className="overflow-x-auto rounded-xl border border-[#1a3d75] bg-[#030712]">
-            <table className="w-full text-left">
-              <thead className="bg-[#12284c] text-cyan-300 font-bold uppercase text-xs tracking-wider">
-                <tr>
-                  <th className="px-6 py-4">Username</th>
-                  <th className="px-6 py-4">Points Balance</th>
-                  <th className="px-6 py-4">Role</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#1a3d75]">
-                {allUsers.map(u => (
-                  <tr key={u.id} className="hover:bg-[#0a1526] transition-colors">
-                    <td className="px-6 py-4 font-bold text-white">{u.username}</td>
-                    <td className="px-6 py-4 text-yellow-400 font-mono font-bold">{u.points.toLocaleString()}</td>
-                    <td className="px-6 py-4">
-                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${u.role === 'admin' ? 'bg-red-900/50 text-red-400 border border-red-500/50' : 'bg-blue-900/50 text-blue-400 border border-blue-500/50'}`}>
-                            {u.role}
-                        </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  return (
-    <div className="min-h-screen bg-[#030712] text-gray-200 font-sans pb-20 relative selection:bg-cyan-500/30 selection:text-cyan-200" style={{backgroundImage: 'radial-gradient(circle at 50% 0%, #0a1526 0%, #030712 100%)'}}>
-      {/* Global CSS for scrollbar and animations */}
-      <style dangerouslySetInnerHTML={{__html: `
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;700;900&family=Space+Grotesk:wght@400;700&display=swap');
+        body {
+            font-family: 'Kanit', 'Space Grotesk', sans-serif;
+        }
         .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: #030712; border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: #1a3d75; border-radius: 10px; }
@@ -696,21 +38,731 @@ export default function App() {
         .rotate-x-2 { transform: rotateX(2deg); }
         .rotate-y-2 { transform: rotateY(2deg); }
         
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-      `}} />
-      
-      {profile.username && <Navbar />}
-      <div className="px-4 relative z-10">
-        {page === 'home' && renderHome()}
-        {page === 'shop' && renderShop()}
-        {page === 'topup' && renderTopup()}
-        {page === 'admin' && renderAdmin()}
-      </div>
-      
-      {/* Footer Decoration */}
-      {profile.username && (
-          <div className="fixed bottom-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-cyan-500 to-transparent opacity-20"></div>
-      )}
-    </div>
-  );
-}
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .animate-fade-in { animation: fadeIn 0.5s ease-out forwards; }
+    </style>
+</head>
+<body class="bg-[#030712] text-gray-200 min-h-screen">
+
+    <div id="root"></div>
+
+    <!-- Firebase App & Firestore Web SDKs -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect } from "react";
+        import { createRoot } from "react-dom/client";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        // เพิ่ม signInWithCustomToken ที่ตกหล่น
+        import { getAuth, signInAnonymously, onAuthStateChanged, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, doc, setDoc, updateDoc, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Firebase Config (Fallback & Canvas Runtime compatible) ---
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "", // ใส่ Firebase API Key ของคุณที่นี่ (หากต้องการเชื่อมฐานข้อมูลตัวเองบน Vercel)
+            authDomain: "null-dev-shop.firebaseapp.com",
+            projectId: "null-dev-shop",
+            storageBucket: "null-dev-shop.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'null-developer-v1';
+
+        // --- Discord Webhook Config ---
+        const DISCORD_WEBHOOK_URL = "https://discord.com/api/webhooks/1519398387382878378/ibyXLVt6pY7OlSqXmIb4_XQOGTzCx3sZColnr8s2iKWK6e-P3jIt3wnMv6TzEwlRn_T-";
+
+        // --- Mock Data ---
+        const initialProducts = [
+            { id: 'p1', name: 'VIP Script - Daily', price: 50, duration: 1, type: 'days1', desc: 'ปลดล็อกสคริปต์ VIP เต็มรูปแบบ 24 ชั่วโมง พร้อมบอทช่วยเล่นอัตโนมัติ' },
+            { id: 'p2', name: 'VIP Script - Weekly', price: 300, duration: 7, type: 'days7', desc: 'ปลดล็อกสคริปต์ VIP เต็มรูปแบบ 7 วัน คุ้มค่าที่สุดสำหรับสายลุย' },
+            { id: 'p3', name: 'VIP Script - Half Month', price: 550, duration: 15, type: 'days15', desc: 'ปลดล็อกสคริปต์ VIP เต็มรูปแบบ 15 วัน เพื่อการฟาร์มที่ต่อเนื่องยาวนาน' },
+            { id: 'p4', name: 'VIP Script - Monthly', price: 1000, duration: 30, type: 'days30', desc: 'ปลดล็อกสคริปต์ VIP เต็มรูปแบบ 30 วัน สิทธิ์พิเศษระดับสูงสุดและซัพพอร์ต 24 ชม.' },
+        ];
+
+        const translations = {
+            th: {
+                home: "หน้าหลัก", shop: "ร้านค้า", topup: "เติมเงิน", admin: "ระบบแอดมิน",
+                login: "เข้าสู่ระบบ / สมัครสมาชิก", username: "ชื่อผู้ใช้", password: "รหัสผ่าน",
+                enter_username: "กรอกชื่อผู้ใช้ของคุณ", enter_password: "กรอกรหัสผ่าน (ถ้ามี)",
+                submit_login: "เข้าสู่ระบบ", logout: "ออกจากระบบ",
+                points: "พอยท์", balance: "ยอดคงเหลือ",
+                search: "ค้นหาสินค้าที่นี่...", buy: "ซื้อตอนนี้", 
+                days1: "1 วัน", days7: "7 วัน", days15: "15 วัน", days30: "30 วัน",
+                upload_slip: "แนบลิงก์รูปสลิป / อัปโหลด", amount: "จำนวนเงินโอน (บาท)", submit_topup: "แจ้งโอนเงินเข้าระบบ",
+                scan_qr: "สแกน QR เพื่อโอนเงินเข้า PromptPay",
+                history: "ประวัติการแจ้งโอนของคุณ", status: "สถานะ", pending: "รอตรวจสอบ", approved: "สำเร็จ",
+                my_codes: "สคริปต์ / คีย์ของคุณ", reveal_code: "ดูโค้ด",
+                admin_panel: "แผงควบคุมแอดมิน", approve: "อนุมัติรายการ", reject: "ปฏิเสธ",
+                no_products: "ไม่พบสินค้าที่ค้นหา", success_buy: "สั่งซื้อสำเร็จ! ตรวจสอบสคริปต์ของคุณได้ที่หน้าหลัก",
+                insufficient_points: "พอยท์ของคุณไม่เพียงพอ กรุณาเติมเงินก่อนสั่งซื้อ"
+            },
+            en: {
+                home: "Home", shop: "Shop", topup: "Top-up", admin: "Admin Panel",
+                login: "Login / Register", username: "Username", password: "Password",
+                enter_username: "Enter your username", enter_password: "Enter password",
+                submit_login: "Login", logout: "Logout",
+                points: "Points", balance: "Balance",
+                search: "Search products...", buy: "Buy Now",
+                days1: "1 Day", days7: "7 Days", days15: "15 Days", days30: "30 Days",
+                upload_slip: "Slip Image Link / Upload", amount: "Amount (THB)", submit_topup: "Submit Top-up",
+                scan_qr: "Scan QR Code to Transfer",
+                history: "Top-up History", status: "Status", pending: "Pending", approved: "Approved",
+                my_codes: "My Scripts / Keys", reveal_code: "Reveal",
+                admin_panel: "Backend Control", approve: "Approve", reject: "Reject",
+                no_products: "No products found", success_buy: "Purchase successful! Check Home page.",
+                insufficient_points: "Insufficient points. Please top-up first."
+            }
+        };
+
+        function App() {
+            const [user, setUser] = useState(null);
+            const [lang, setLang] = useState('th');
+            const [page, setPage] = useState('login');
+            const [profile, setProfile] = useState({ username: '', points: 0, role: 'user', inventory: [] });
+            const [topups, setTopups] = useState([]);
+            const [allUsers, setAllUsers] = useState([]);
+            
+            // Forms & UI States
+            const [loginName, setLoginName] = useState('');
+            const [topupAmount, setTopupAmount] = useState('');
+            const [slipUrl, setSlipUrl] = useState('');
+            const [searchQuery, setSearchQuery] = useState('');
+            const [notification, setNotification] = useState(null);
+            const [loading, setLoading] = useState(false);
+
+            const t = translations[lang];
+
+            // Show custom notification toast instead of window.alert()
+            const showToast = (message, type = 'success') => {
+                setNotification({ message, type });
+                setTimeout(() => setNotification(null), 4000);
+            };
+
+            // 1. Authenticate Anonymously & Sync State
+            useEffect(() => {
+                const initAuth = async () => {
+                    try {
+                        if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                            await signInWithCustomToken(auth, __initial_auth_token);
+                        } else {
+                            await signInAnonymously(auth);
+                        }
+                    } catch (e) {
+                        console.error("Firebase auth error:", e);
+                    }
+                };
+                initAuth();
+                const unsubscribe = onAuthStateChanged(auth, setUser);
+                return () => unsubscribe();
+            }, []);
+
+            // 2. Fetch Profiles and Topups from Firestore Real-time
+            useEffect(() => {
+                if (!user) return;
+
+                // Path Rule 1: Custom path for multi-tenant canvas
+                const profileRef = collection(db, 'artifacts', appId, 'public', 'data', 'profiles');
+                const topupRef = collection(db, 'artifacts', appId, 'public', 'data', 'topups');
+
+                const unsubProfile = onSnapshot(profileRef, (snapshot) => {
+                    const profiles = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setAllUsers(profiles);
+                    const myProfile = profiles.find(p => p.id === user.uid);
+                    if (myProfile) {
+                        setProfile(myProfile);
+                    }
+                }, (err) => console.error("Firestore Profile Fetch Error:", err));
+
+                const unsubTopup = onSnapshot(topupRef, (snapshot) => {
+                    const tps = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    setTopups(tps);
+                }, (err) => console.error("Firestore Topup Fetch Error:", err));
+
+                return () => {
+                    unsubProfile();
+                    unsubTopup();
+                };
+            }, [user]);
+
+            // Handle Login / Registration
+            const handleLogin = async () => {
+                if (!loginName.trim()) {
+                    showToast(lang === 'th' ? 'กรุณากรอกชื่อผู้ใช้' : 'Please enter a username', 'error');
+                    return;
+                }
+                if (!user) return;
+
+                const normalizedInput = loginName.trim();
+                const existing = allUsers.find(p => p.username.toLowerCase() === normalizedInput.toLowerCase());
+
+                if (!existing) {
+                    // Create dynamic user profile
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid);
+                    const isNewAdmin = normalizedInput.toLowerCase() === 'admin';
+                    const newProfile = {
+                        username: normalizedInput,
+                        points: isNewAdmin ? 99999 : 0, // Admin start points
+                        role: isNewAdmin ? 'admin' : 'user',
+                        inventory: []
+                    };
+                    await setDoc(docRef, newProfile);
+                    setProfile({ id: user.uid, ...newProfile });
+                } else {
+                    // Simulating login or link with existing profile
+                    const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid);
+                    await setDoc(docRef, {
+                        username: existing.username,
+                        points: existing.points,
+                        role: existing.role,
+                        inventory: existing.inventory || []
+                    });
+                    setProfile(existing);
+                }
+                setPage('home');
+                showToast(lang === 'th' ? `ยินดีต้อนรับคุณ ${normalizedInput}` : `Welcome ${normalizedInput}!`);
+            };
+
+            // Send Notification to Discord Webhook
+            const notifyDiscord = async (username, amount, slip) => {
+                if (!DISCORD_WEBHOOK_URL) return;
+                
+                const finalSlipUrl = slip || "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?w=500&auto=format&fit=crop&q=60";
+                const payload = {
+                    content: "🚨 **มีการแจ้งโอนเงินเติมพอยท์เข้ามาใหม่! (Real-time)** 🚨",
+                    embeds: [{
+                        title: "📝 รายละเอียดการทำรายการ",
+                        color: 3066993, // Green
+                        fields: [
+                            { name: "👤 ชื่อผู้ใช้งาน", value: username, inline: true },
+                            { name: "💵 จำนวนเงินโอน", value: `**${amount} บาท**`, inline: true },
+                            { name: "⏰ วันเวลา", value: new Date().toLocaleString('th-TH'), inline: false },
+                            { name: "🔗 ลิงก์รูปสลิป", value: finalSlipUrl, inline: false }
+                        ],
+                        image: { url: finalSlipUrl },
+                        footer: { text: "NULL DEV - AUTO PAYMENT SYSTEM" }
+                    }]
+                };
+
+                try {
+                    await fetch(DISCORD_WEBHOOK_URL, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(payload)
+                    });
+                } catch (error) {
+                    console.error("Discord Notification Failed:", error);
+                }
+            };
+
+            // Submit Topup
+            const handleTopup = async () => {
+                if (!topupAmount || isNaN(topupAmount) || Number(topupAmount) <= 0) {
+                    showToast(lang === 'th' ? 'กรุณากรอกจำนวนเงินให้ถูกต้อง' : 'Please enter a valid amount', 'error');
+                    return;
+                }
+
+                setLoading(true);
+                const defaultSlip = slipUrl.trim() || "https://images.unsplash.com/photo-1554415707-6e8cfc93fe23?w=500&auto=format&fit=crop&q=60";
+                const ref = collection(db, 'artifacts', appId, 'public', 'data', 'topups');
+                
+                await addDoc(ref, {
+                    userId: user.uid,
+                    username: profile.username,
+                    amount: Number(topupAmount),
+                    slipUrl: defaultSlip,
+                    status: 'pending',
+                    timestamp: new Date().toISOString()
+                });
+
+                // Notify Discord Webhook asynchronously
+                await notifyDiscord(profile.username, topupAmount, defaultSlip);
+
+                setTopupAmount('');
+                setSlipUrl('');
+                setLoading(false);
+                showToast(lang === 'th' ? 'ส่งหลักฐานสำเร็จ! ส่งแจ้งเตือนไปยังแอดมินแล้ว' : 'Slip submitted! Admin notified.');
+            };
+
+            // Buy VIP Script
+            const handleBuy = async (product) => {
+                if (profile.points < product.price) {
+                    showToast(t.insufficient_points, 'error');
+                    return;
+                }
+
+                const newPoints = profile.points - product.price;
+                const generatedCode = `NULL-${product.duration}D-${Math.random().toString(36).substring(2, 10).toUpperCase()}`;
+                
+                const newInventory = [...(profile.inventory || []), {
+                    productName: product.name,
+                    code: generatedCode,
+                    boughtAt: new Date().toISOString()
+                }];
+
+                const docRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', user.uid);
+                await updateDoc(docRef, {
+                    points: newPoints,
+                    inventory: newInventory
+                });
+                
+                showToast(t.success_buy, 'success');
+            };
+
+            // Admin Actions
+            const adminApproveTopup = async (topupId, userId, amount) => {
+                // Update Topup
+                const tpRef = doc(db, 'artifacts', appId, 'public', 'data', 'topups', topupId);
+                await updateDoc(tpRef, { status: 'approved' });
+
+                // Find User & Credit Points
+                const userToUpdate = allUsers.find(u => u.id === userId);
+                if (userToUpdate) {
+                    const uRef = doc(db, 'artifacts', appId, 'public', 'data', 'profiles', userId);
+                    await updateDoc(uRef, { points: (userToUpdate.points || 0) + amount });
+                    showToast(`อนุมัติวงเงิน ${amount} บาท ให้คุณ ${userToUpdate.username} เรียบร้อยแล้ว!`);
+                }
+            };
+
+            const adminRejectTopup = async (topupId) => {
+                const tpRef = doc(db, 'artifacts', appId, 'public', 'data', 'topups', topupId);
+                await updateDoc(tpRef, { status: 'rejected' });
+                showToast('ปฏิเสธการทำรายการแล้ว', 'error');
+            };
+
+            const copyToClipboard = (text) => {
+                // Compatible clipboard copy for iframe/canvas
+                const el = document.createElement('textarea');
+                el.value = text;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand('copy');
+                document.body.removeChild(el);
+                showToast(lang === 'th' ? 'คัดลอกคีย์ไปยังคลิปบอร์ดแล้ว!' : 'Key copied to clipboard!');
+            };
+
+            return (
+                <div className="min-h-screen pb-16 flex flex-col relative overflow-x-hidden bg-[#030712] text-gray-200">
+                    {/* Background glows */}
+                    <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none z-0">
+                        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-blue-600/15 rounded-full filter blur-[120px] animate-pulse"></div>
+                        <div className="absolute bottom-1/4 right-1/4 w-[500px] h-[500px] bg-cyan-400/15 rounded-full filter blur-[120px] animate-pulse" style={{ animationDelay: '3s' }}></div>
+                    </div>
+
+                    {/* Notification Toast */}
+                    {notification && (
+                        <div className={`fixed top-6 right-6 z-50 flex items-center gap-3 px-6 py-4 rounded-2xl shadow-2xl border transition-all duration-300 transform translate-y-0 ${
+                            notification.type === 'error' 
+                                ? 'bg-red-950/80 border-red-500/50 text-red-100' 
+                                : 'bg-emerald-950/80 border-emerald-500/50 text-emerald-100'
+                        }`}>
+                            <span className="text-xl">{notification.type === 'error' ? '❌' : '✅'}</span>
+                            <span className="font-medium">{notification.message}</span>
+                        </div>
+                    )}
+
+                    {/* Navigation Bar */}
+                    <nav className="fixed w-full z-40 top-0 bg-[#060d1a]/80 backdrop-blur-md border-b border-[#143261] shadow-[0_4px_30px_rgba(0,210,255,0.05)]">
+                        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                            <div className="flex justify-between items-center h-20">
+                                <div className="flex gap-8 items-center">
+                                    <div className="relative group cursor-pointer flex items-center gap-3" onClick={() => profile.username && setPage('home')}>
+                                        <div className="relative flex items-center gap-3 bg-[#0a1526] px-4 py-2 rounded-xl border border-[#1a3d75] shadow-lg">
+                                            <div className="h-10 w-10 rounded-full border-2 border-cyan-400 bg-gradient-to-r from-blue-600 to-cyan-500 flex items-center justify-center font-black text-white shadow-md">⭐</div>
+                                            <span className="text-2xl font-black bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 via-blue-400 to-blue-600 tracking-wider">NULL<span className="text-gray-300 font-light text-lg">DEV</span></span>
+                                        </div>
+                                    </div>
+
+                                    {profile.username && (
+                                        <div className="hidden md:flex gap-2 bg-[#0a1526]/80 p-1 rounded-xl border border-[#143261]">
+                                            {[
+                                                { id: 'home', label: t.home, icon: '🏠' },
+                                                { id: 'shop', label: t.shop, icon: '🛒' },
+                                                { id: 'topup', label: t.topup, icon: '💳' },
+                                            ].map((item) => (
+                                                <button 
+                                                    key={item.id}
+                                                    onClick={() => setPage(item.id)} 
+                                                    className={`px-5 py-2.5 rounded-lg transition-all duration-300 font-semibold flex items-center gap-2 ${
+                                                        page === item.id 
+                                                            ? 'bg-gradient-to-r from-blue-500 to-blue-700 text-white shadow-[0_4px_15px_rgba(0,120,255,0.4)] border border-blue-400' 
+                                                            : 'text-gray-400 hover:text-cyan-300 hover:bg-[#12284c]'
+                                                    }`}
+                                                >
+                                                    <span>{item.icon}</span> {item.label}
+                                                </button>
+                                            ))}
+                                            {profile.role === 'admin' && (
+                                                <button onClick={() => setPage('admin')} className={`px-5 py-2.5 rounded-lg font-semibold flex items-center gap-2 transition-all duration-300 ${page==='admin' ? 'bg-gradient-to-r from-red-600 to-red-800 text-white border border-red-500 shadow-[0_4px_15px_rgba(239,68,68,0.4)]' : 'text-red-400 hover:text-red-300 hover:bg-red-950/30'}`}>
+                                                    ⚙️ {t.admin}
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex gap-4 items-center">
+                                    <button onClick={() => setLang(lang === 'th' ? 'en' : 'th')} className="bg-[#12284c] hover:bg-[#1a3d75] text-cyan-300 px-3 py-2 rounded-xl text-sm font-bold border border-[#1a3d75] transition-colors">
+                                        {lang === 'th' ? 'EN' : 'TH'}
+                                    </button>
+                                    {profile.username && (
+                                        <div className="flex items-center gap-4 bg-[#0a1526] p-1.5 pr-4 rounded-full border border-[#143261]">
+                                            <div className="bg-gradient-to-r from-blue-600 to-cyan-500 px-4 py-2 rounded-full text-sm font-bold text-white shadow-md flex items-center gap-2">
+                                                <span className="text-yellow-300">💎</span>
+                                                {profile.points.toLocaleString()} {t.points}
+                                            </div>
+                                            <div className="hidden sm:flex flex-col">
+                                                <span className="text-xs text-gray-400">ยินดีต้อนรับ,</span>
+                                                <span className="text-sm font-bold text-cyan-100">{profile.username}</span>
+                                            </div>
+                                            <button onClick={() => { setProfile({username:'', points:0, role:'user'}); setPage('login'); }} className="ml-2 text-red-400 hover:text-red-300 hover:bg-red-900/30 p-2 rounded-full transition-colors" title={t.logout}>
+                                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </nav>
+
+                    {/* Content Section */}
+                    <div className="flex-grow pt-24 px-4 sm:px-6 lg:px-8 relative z-10">
+                        {page === 'login' && (
+                            <div className="min-h-[80vh] flex items-center justify-center animate-fade-in">
+                                <div className="bg-[#0a1526]/90 backdrop-blur-xl p-8 sm:p-10 rounded-3xl shadow-[0_0_50px_rgba(0,100,255,0.15)] w-full max-w-md border border-[#1a3d75] relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-cyan-400 to-blue-600"></div>
+                                    <div className="text-center mb-8">
+                                        <div className="w-20 h-20 mx-auto bg-gradient-to-tr from-cyan-400 to-blue-600 rounded-full flex items-center justify-center text-white font-black text-3xl shadow-lg border-2 border-cyan-400 mb-4 animate-bounce">
+                                            N
+                                        </div>
+                                        <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500">{t.login}</h2>
+                                        <p className="text-gray-400 mt-2 text-sm">เข้าถึงระบบร้านค้าสคริปต์ VIP ที่เสถียรที่สุด</p>
+                                    </div>
+
+                                    <div className="space-y-5">
+                                        <div>
+                                            <label className="block text-sm font-semibold text-cyan-200 mb-1.5 ml-1">{t.username}</label>
+                                            <div className="relative">
+                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">👤</span>
+                                                <input 
+                                                    type="text" placeholder={t.enter_username} value={loginName}
+                                                    onChange={e => setLoginName(e.target.value)}
+                                                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                                                    className="w-full pl-10 pr-4 py-3.5 bg-[#030712] border border-[#1a3d75] rounded-xl text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <label className="block text-sm font-semibold text-cyan-200 mb-1.5 ml-1">{t.password}</label>
+                                            <div className="relative">
+                                                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">🔒</span>
+                                                <input 
+                                                    type="password" placeholder={t.enter_password}
+                                                    onKeyDown={e => e.key === 'Enter' && handleLogin()}
+                                                    className="w-full pl-10 pr-4 py-3.5 bg-[#030712] border border-[#1a3d75] rounded-xl text-white focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition-all"
+                                                />
+                                            </div>
+                                        </div>
+                                        <button onClick={handleLogin} className="w-full relative group mt-4 overflow-hidden rounded-xl">
+                                            <div className="absolute -inset-0.5 bg-gradient-to-r from-cyan-400 to-blue-600 rounded-xl blur opacity-70 group-hover:opacity-100 transition duration-200"></div>
+                                            <div className="relative w-full bg-gradient-to-b from-blue-500 to-blue-700 text-white font-bold py-4 rounded-xl border border-blue-400 flex justify-center items-center gap-2">
+                                                {t.submit_login} ➡️
+                                            </div>
+                                        </button>
+                                        <p className="text-xs text-center text-gray-500 mt-4">หมายเหตุ: พิมพ์ "admin" เป็นชื่อผู้ใช้เพื่อเข้าหน้าแดชบอร์ดจัดการของแอดมิน</p>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {page === 'home' && profile.username && (
+                            <div className="max-w-5xl mx-auto mt-8 animate-fade-in space-y-10">
+                                {/* User Card */}
+                                <div className="relative group overflow-hidden bg-[#0a1526]/90 p-8 rounded-3xl border border-[#1a3d75] shadow-2xl flex flex-col md:flex-row items-center justify-between gap-6">
+                                    <div className="flex items-center gap-6">
+                                        <div className="h-20 w-20 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-700 flex items-center justify-center font-black text-white text-3xl shadow-lg border-2 border-cyan-400">
+                                            {profile.username[0].toUpperCase()}
+                                        </div>
+                                        <div>
+                                            <h2 className="text-3xl font-black text-white">ยินดีต้อนรับ, <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-blue-500">{profile.username}</span></h2>
+                                            <p className="text-gray-400 mt-1 flex items-center gap-2">
+                                                <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                                สถานะออนไลน์ | สิทธิ์: {profile.role}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="bg-[#030712] px-8 py-5 rounded-2xl border border-[#1a3d75] text-center min-w-[200px]">
+                                        <span className="text-xs text-gray-400 block mb-1 font-bold uppercase tracking-widest">{t.balance}</span>
+                                        <span className="text-4xl font-black text-yellow-400 drop-shadow-md">{profile.points.toLocaleString()} <span className="text-lg text-yellow-600">Pts</span></span>
+                                    </div>
+                                </div>
+
+                                {/* Script Inventory */}
+                                <div>
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="h-8 w-1.5 bg-cyan-400 rounded-full"></div>
+                                        <h3 className="text-2xl font-black text-white">{t.my_codes}</h3>
+                                    </div>
+
+                                    {(!profile.inventory || profile.inventory.length === 0) ? (
+                                        <div className="bg-[#0a1526]/50 p-12 rounded-3xl border border-dashed border-[#1a3d75] text-center">
+                                            <span className="text-5xl block mb-4">📦</span>
+                                            <p className="text-gray-400 text-lg font-medium">คุณยังไม่มีสคริปต์หรือคีย์ในคลัง</p>
+                                            <button onClick={() => setPage('shop')} className="mt-4 px-6 py-2.5 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold rounded-xl shadow-lg">
+                                                เลือกซื้อสคริปต์
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            {profile.inventory.map((item, idx) => (
+                                                <div key={idx} className="bg-[#0a1526] p-6 rounded-2xl border border-[#1a3d75] shadow-lg flex flex-col justify-between">
+                                                    <div className="flex justify-between items-start mb-4">
+                                                        <div>
+                                                            <h4 className="font-bold text-lg text-cyan-200">{item.productName}</h4>
+                                                            <p className="text-xs text-gray-500 mt-1">ซื้อเมื่อ: {new Date(item.boughtAt).toLocaleString()}</p>
+                                                        </div>
+                                                        <span className="text-2xl">🔑</span>
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-gray-400 uppercase tracking-widest mb-1.5 block">LICENSE KEY</label>
+                                                        <div 
+                                                            onClick={() => copyToClipboard(item.code)}
+                                                            className="bg-[#030712] p-3 rounded-xl border border-dashed border-emerald-500/50 flex justify-between items-center cursor-pointer hover:bg-emerald-950/20 transition-all font-mono text-emerald-400"
+                                                        >
+                                                            <span className="truncate">{item.code}</span>
+                                                            <span className="text-gray-400 hover:text-white">📋</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        )}
+
+                        {page === 'shop' && (
+                            <div className="max-w-6xl mx-auto mt-8 animate-fade-in space-y-8">
+                                <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                    <div className="flex items-center gap-3">
+                                        <div className="h-10 w-2 bg-gradient-to-b from-cyan-400 to-blue-600 rounded-full shadow-lg"></div>
+                                        <h2 className="text-3xl font-black text-white">{t.shop}</h2>
+                                    </div>
+                                    <div className="relative w-full sm:w-80">
+                                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">🔍</span>
+                                        <input 
+                                            type="text" placeholder={t.search} value={searchQuery}
+                                            onChange={e => setSearchQuery(e.target.value)}
+                                            className="w-full pl-10 pr-4 py-3 bg-[#0a1526] border border-[#1a3d75] rounded-xl text-white focus:outline-none"
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                                    {initialProducts.filter(p => p.name.toLowerCase().includes(searchQuery.toLowerCase())).map(p => (
+                                        <div key={p.id} className="bg-[#0a1526] rounded-2xl overflow-hidden border border-[#1a3d75] flex flex-col justify-between shadow-lg hover:-translate-y-2 transition-all duration-300">
+                                            <div className="p-6">
+                                                <div className="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 p-4 rounded-xl text-center mb-4 border border-cyan-800/30">
+                                                    <span className="text-3xl font-black text-white block">{p.duration}</span>
+                                                    <span className="text-xs text-cyan-300 uppercase font-bold tracking-widest">{lang === 'th' ? 'วัน' : 'DAYS'}</span>
+                                                </div>
+                                                <h3 className="font-bold text-lg text-white mb-2">{p.name}</h3>
+                                                <p className="text-sm text-gray-400 leading-relaxed">{p.desc}</p>
+                                            </div>
+                                            <div className="p-6 bg-[#030712] border-t border-[#1a3d75] space-y-4">
+                                                <div className="flex justify-between items-center">
+                                                    <span className="text-gray-400 text-sm">ราคา</span>
+                                                    <span className="text-xl font-bold text-yellow-400">{p.price.toLocaleString()} พอยท์</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => handleBuy(p)}
+                                                    className="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3 rounded-xl transition-all shadow-md"
+                                                >
+                                                    {t.buy}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {page === 'topup' && (
+                            <div className="max-w-5xl mx-auto mt-8 animate-fade-in space-y-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-2 bg-gradient-to-b from-green-400 to-emerald-600 rounded-full shadow-lg"></div>
+                                    <h2 className="text-3xl font-black text-white">{t.topup}</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                    {/* Topup Form */}
+                                    <div className="lg:col-span-5 bg-[#0a1526] p-8 rounded-3xl border border-[#1a3d75] shadow-xl space-y-6">
+                                        <div className="bg-white p-5 rounded-2xl text-center shadow-inner">
+                                            <p className="text-blue-900 font-black text-lg tracking-widest mb-3">PROMPTPAY / QR PAYMENT</p>
+                                            <div className="w-40 h-40 mx-auto bg-gray-100 border-2 border-dashed border-gray-300 rounded-xl flex items-center justify-center p-2">
+                                                {/* Simulated QR Pattern */}
+                                                <div className="text-center">
+                                                    <span className="text-3xl block">📲</span>
+                                                    <span className="text-[10px] text-gray-600 uppercase font-bold">SCAN ME</span>
+                                                </div>
+                                            </div>
+                                            <p className="text-gray-700 font-bold mt-3 text-sm">เบอร์พร้อมเพย์: 080-XXX-XXXX</p>
+                                        </div>
+
+                                        <div className="space-y-4">
+                                            <div>
+                                                <label className="block text-sm font-semibold text-cyan-200 mb-1.5 ml-1">{t.amount}</label>
+                                                <input 
+                                                    type="number" value={topupAmount} onChange={e => setTopupAmount(e.target.value)}
+                                                    className="w-full px-4 py-3 bg-[#030712] border border-[#1a3d75] rounded-xl text-white font-bold"
+                                                    placeholder="0.00"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-sm font-semibold text-cyan-200 mb-1.5 ml-1">{t.upload_slip}</label>
+                                                <input 
+                                                    type="text" value={slipUrl} onChange={e => setSlipUrl(e.target.value)}
+                                                    className="w-full px-4 py-3 bg-[#030712] border border-[#1a3d75] rounded-xl text-white text-sm"
+                                                    placeholder="วางลิงก์รูปสลิปของคุณที่นี่"
+                                                />
+                                            </div>
+                                            <button 
+                                                onClick={handleTopup} disabled={loading}
+                                                className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-bold py-3.5 rounded-xl transition-all shadow-md"
+                                            >
+                                                {loading ? 'กำลังส่งข้อมูล...' : t.submit_topup}
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    {/* History Table */}
+                                    <div className="lg:col-span-7 bg-[#0a1526]/50 p-8 rounded-3xl border border-[#1a3d75] shadow-xl flex flex-col h-[520px]">
+                                        <h3 className="text-xl font-bold mb-4 text-white">📜 {t.history}</h3>
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-3 custom-scrollbar">
+                                            {topups.filter(item => item.userId === user.uid).length === 0 ? (
+                                                <div className="text-center py-20 text-gray-500">ไม่มีประวัติการแจ้งโอน</div>
+                                            ) : (
+                                                topups.filter(item => item.userId === user.uid).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp)).map(item => (
+                                                    <div key={item.id} className="bg-[#0a1526] p-4 rounded-xl border border-[#143261] flex justify-between items-center">
+                                                        <div>
+                                                            <span className="text-lg font-bold text-white">{item.amount} THB</span>
+                                                            <span className="text-xs text-gray-500 block">{new Date(item.timestamp).toLocaleString('th-TH')}</span>
+                                                        </div>
+                                                        <span className={`px-3 py-1 rounded-full text-xs font-bold border ${
+                                                            item.status === 'approved' ? 'bg-emerald-950/40 text-emerald-400 border-emerald-500/50' :
+                                                            item.status === 'rejected' ? 'bg-red-950/40 text-red-400 border-red-500/50' : 'bg-yellow-950/40 text-yellow-400 border-yellow-500/50'
+                                                        }`}>
+                                                            {item.status === 'approved' ? t.approved : item.status === 'rejected' ? 'ปฏิเสธ' : t.pending}
+                                                        </span>
+                                                    </div>
+                                                ))
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {page === 'admin' && profile.role === 'admin' && (
+                            <div className="max-w-6xl mx-auto mt-8 animate-fade-in space-y-10">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-2 bg-gradient-to-b from-red-500 to-red-800 rounded-full shadow-lg"></div>
+                                    <h2 className="text-3xl font-black text-white">Admin Management</h2>
+                                </div>
+
+                                {/* Pending Topups List */}
+                                <div className="bg-[#0a1526] p-6 sm:p-8 rounded-3xl border border-[#1a3d75] shadow-xl">
+                                    <h3 className="text-xl font-bold mb-6 text-red-400 flex items-center gap-2">
+                                        <span className="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+                                        รายการเติมเงินรออนุมัติ ({topups.filter(t => t.status === 'pending').length})
+                                    </h3>
+                                    
+                                    <div className="overflow-x-auto rounded-xl border border-[#1a3d75] bg-[#030712]">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-[#12284c] text-cyan-300 font-bold text-xs uppercase tracking-wider">
+                                                <tr>
+                                                    <th className="px-6 py-4">ผู้ใช้งาน</th>
+                                                    <th className="px-6 py-4">ยอดโอน</th>
+                                                    <th className="px-6 py-4">หลักฐานสลิป</th>
+                                                    <th className="px-6 py-4 text-right">การจัดการ</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-[#1a3d75]">
+                                                {topups.filter(t => t.status === 'pending').length === 0 ? (
+                                                    <tr><td colSpan="4" className="px-6 py-8 text-center text-gray-500">ไม่มีรายการรออนุมัติ</td></tr>
+                                                ) : (
+                                                    topups.filter(t => t.status === 'pending').map(tp => (
+                                                        <tr key={tp.id} className="hover:bg-[#0a1526]/50">
+                                                            <td className="px-6 py-4 font-bold text-white">{tp.username}</td>
+                                                            <td className="px-6 py-4 font-black text-emerald-400 text-lg">{tp.amount} ฿</td>
+                                                            <td className="px-6 py-4">
+                                                                <a href={tp.slipUrl} target="_blank" rel="noreferrer" className="text-cyan-400 hover:underline">คลิกดูสลิปรูปภาพ</a>
+                                                            </td>
+                                                            <td className="px-6 py-4 text-right space-x-2">
+                                                                <button 
+                                                                    onClick={() => adminApproveTopup(tp.id, tp.userId, tp.amount)}
+                                                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 py-2 rounded-lg text-sm"
+                                                                >
+                                                                    อนุมัติ
+                                                                </button>
+                                                                <button 
+                                                                    onClick={() => adminRejectTopup(tp.id)}
+                                                                    className="bg-red-600 hover:bg-red-500 text-white font-bold px-4 py-2 rounded-lg text-sm"
+                                                                >
+                                                                    ปฏิเสธ
+                                                                </button>
+                                                            </td>
+                                                        </tr>
+                                                    ))
+                                                )}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                {/* System Users DB */}
+                                <div className="bg-[#0a1526] p-8 rounded-3xl border border-[#1a3d75]">
+                                    <h3 className="text-xl font-bold mb-6 text-white">รายชื่อผู้ใช้ทั้งหมดในระบบ</h3>
+                                    <div className="overflow-x-auto rounded-xl border border-[#1a3d75] bg-[#030712]">
+                                        <table className="w-full text-left">
+                                            <thead className="bg-[#12284c] text-cyan-300 font-bold text-xs uppercase tracking-wider">
+                                                <tr>
+                                                    <th className="px-6 py-4">ชื่อผู้ใช้</th>
+                                                    <th className="px-6 py-4">จำนวนพอยท์ (Points)</th>
+                                                    <th className="px-6 py-4">บทบาท (Role)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="divide-y divide-[#1a3d75]">
+                                                {allUsers.map(u => (
+                                                    <tr key={u.id}>
+                                                        <td className="px-6 py-4 font-bold text-white">{u.username}</td>
+                                                        <td className="px-6 py-4 text-yellow-400 font-mono font-bold">{u.points.toLocaleString()}</td>
+                                                        <td className="px-6 py-4">
+                                                            <span className={`px-2.5 py-1 rounded-full text-xs font-bold uppercase border ${
+                                                                u.role === 'admin' ? 'bg-red-950/50 text-red-400 border-red-500/50' : 'bg-blue-950/50 text-blue-400 border-blue-500/50'
+                                                            }`}>
+                                                                {u.role}
+                                                            </span>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
