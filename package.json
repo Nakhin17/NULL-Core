@@ -1,8 +1,8 @@
 {
-"name": "my-null-app",
-"version": "1.0.0",
-"description": "ระบบร้านค้าและเติมเงินผ่านเว็บ",
-"scripts": {
-"build": "mkdir -p dist && cp public/index.html dist/index.html"
-}
+  "name": "my-null-app",
+  "version": "1.0.0",
+  "description": "ระบบร้านค้าและเติมเงินผ่านเว็บ",
+  "scripts": {
+    "build": "mkdir -p dist && cp index.html dist/index.html"
+  }
 }
